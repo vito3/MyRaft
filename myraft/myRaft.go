@@ -571,6 +571,7 @@ func (rf *Raft) startElection() {
 	// TODO.....
 	var votes int32 = 1
     for i := 0; i < len(rf.members); i++ {
+    	 fmt.Println("election,cur_i", i)
         if rf.address == rf.members[i] {
             continue
         }
@@ -583,7 +584,7 @@ func (rf *Raft) startElection() {
                 /* rf.mu.Lock()
                 defer rf.mu.Unlock() */
                 if reply.Term > rf.currentTerm {
-					//fmt.Println( "reply.beFollower ")
+					fmt.Println( "reply.beFollower ")
                     rf.beFollower(reply.Term)
                     return
                 }
@@ -604,7 +605,6 @@ func (rf *Raft) startElection() {
                 }
             }
         }(i)
-	
 	}    
 }
 
