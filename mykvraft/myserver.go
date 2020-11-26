@@ -43,25 +43,29 @@ func (kv *KVServer) PutAppend(ctx context.Context,args *KV.PutAppendArgs) ( *KV.
 	//time.Sleep(time.Second)
 	reply := &KV.PutAppendReply{}
 	_ , reply.IsLeader = kv.rf.GetState()
-	//reply.IsLeader = false;
+	reply.IsLeader = false
 	if !reply.IsLeader{
 		return reply, nil
 	}
 
-	oringalOp := config.Op{args.Op, args.Key,args.Value, args.Id, args.Seq}
-	index, _, isLeader := kv.rf.Start(oringalOp)
+	originOp := config.Op{args.Op, args.Key,args.Value, args.Id, args.Seq}
+	index, _, isLeader := kv.rf.Start(originOp)
 	if !isLeader {
 		fmt.Println("Leader Changed !")
 		reply.IsLeader = false
 		return reply, nil
 	}
-
-	apply := <- kv.applyCh
-	fmt.Println("apply ", apply)
-	fmt.Println("index", index)
-
+	//apply := <- kv.applyCh
+	ch := kv.putIfAbsent(int(index))
+	//op := <- ch
+	op := beNotified(ch) //实际得到的？,ch可能为空，
+	if equalOp(op, originOp) {
+		reply.IsLeader = true
+		kv.mu.Lock()
+		reply.Success = true
+		kv.mu.Unlock()
+	}
 	return reply, nil
-
 }
 
 
@@ -96,10 +100,27 @@ func (kv *KVServer) Get(ctx context.Context, args *KV.GetArgs) ( *KV.GetReply, e
 }
 
 
-func (kv *KVServer) equal(a config.Op, b config.Op) bool  {
+func  equalOp(a config.Op, b config.Op) bool  {
 	return (a.Option == b.Option && a.Key == b.Key &&a.Value == b.Value) 
 }
 
+func (kv *KVServer) putIfAbsent(idx int) chan config.Op{
+	kv.mu.Lock()
+	defer kv.mu.Unlock()
+	if _,ok := kv.chMap[idx]; !ok {
+		kv.chMap[idx] = make(chan config.Op, 1)
+	}
+	return kv.chMap[idx]
+}
+
+func beNotified(ch chan config.Op) config.Op {
+	select {
+	case op := <- ch:
+		return op
+	case <- time.After(time.Second):
+		return config.Op{}
+	}
+}
 
 
 func (kv *KVServer) RegisterServer(address string)  {
@@ -156,9 +177,29 @@ func main()  {
 	server.db = make(map[string]string)
 	server.persist  = persist
 
+	go func() {
+		for  {
+			applyMsg := <- server.applyCh
+			op := applyMsg.Command.(config.Op)
+			server.mu.Lock()
+			maxSeq,found := server.cid2Seq[op.Id]
+			if !found || op.Seq>maxSeq {//未出现或者该客户端看到的最大序列号小于op的序列号
+				log.Print(op.Id, maxSeq, op.Seq)
+				switch op.Option {
+				case "Put":
+					server.db[op.Key] = op.Value
+				case "Append":
+					server.db[op.Key] += op.Value
+				}
+				server.cid2Seq[op.Id] = op.Seq //每个客户机看到的最大的序列号
+			}
+			server.mu.Unlock()
+			index := applyMsg.CommandIndex
+			ch := server.putIfAbsent(int(index))
+			ch <- op //通道
+		}
+	}()
 
-
-
-	time.Sleep(time.Second*1200)
+	//time.Sleep(time.Second*1200)
 
 }
