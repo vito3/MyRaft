@@ -126,7 +126,7 @@ func (rf *Raft) getLastLogTerm() int32 {
 type IntSlice []int32
 func (s IntSlice) Len() int { return len(s) }
 func (s IntSlice) Swap(i, j int){ s[i], s[j] = s[j], s[i] }
-func (s IntSlice) Less(i, j int) bool { return s[i] < s[j] }
+func (s IntSlice) Less(i, j int)  bool { return s[i] < s[j] }
 
 
 //If there exists an N such that N > commitIndex,
@@ -489,7 +489,7 @@ func (rf *Raft) beLeader() {
 //Candidate Section:
 // If AppendEntries RPC received from new leader: convert to follower implemented in AppendEntries RPC Handler
 func (rf *Raft) beCandidate() { //Reset election timer are finished in caller
-	fmt.Println(rf.address ," become Candidate ", rf.currentTerm)
+	fmt.Println(rf.address ," become Candidate, currentTerm: ", rf.currentTerm)
 	rf.state = Candidate
     rf.currentTerm++ //Increment currentTerm
     rf.votedFor = rf.me //vote myself first
@@ -569,7 +569,7 @@ func (rf *Raft) startElection() {
 
 	};
 	// TODO.....
-	var votes int32 = 1;
+	var votes int32 = 1
     for i := 0; i < len(rf.members); i++ {
         if rf.address == rf.members[i] {
             continue
@@ -592,14 +592,14 @@ func (rf *Raft) startElection() {
 					return
                 }
                 if reply.VoteGranted {
-					//fmt.Println( "#########reply.VoteGranted ############3")
+					fmt.Println( "#########reply.VoteGranted ############3")
                     atomic.AddInt32(&votes,1)
 				}else{
-				//	fmt.Println( "#########reply.VoteGranted false ", reply.Term)
+					fmt.Println( "#########reply.VoteGranted false ", reply.Term)
 				}
                 if atomic.LoadInt32(&votes) > int32(len(rf.members) / 2) {
 					rf.beLeader()
-					//fmt.Println("rf.beLeader()")
+					fmt.Println( rf.address, "beLeader")
                     send(rf.voteCh) //after be leader, then notify 'select' goroutine will sending out heartbeats immediately
                 }
             }
@@ -658,6 +658,7 @@ func (rf *Raft) init () {
     }()
 
 	// Add New 
+
 
 	go  rf.RegisterServer(rf.address)
 	
