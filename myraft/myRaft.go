@@ -567,16 +567,17 @@ func (rf *Raft) startElection() {
         LastLogIndex: rf.getLastLogIdx(),
         LastLogTerm: rf.getLastLogTerm(),
 
-	};
+	}
 	// TODO.....
 	var votes int32 = 1
     for i := 0; i < len(rf.members); i++ {
     	 fmt.Println("election,cur_i", i)
+    	 fmt.Println(rf.address, rf.members[i])
         if rf.address == rf.members[i] {
             continue
         }
 		go func(idx int) { 
-			//fmt.Println("sendRequestVote to :", rf.members[idx])
+			fmt.Println("sendRequestVote to :", rf.members[idx])
         	//reply := RPC.RequestVoteReply{Term:9999, VoteGranted: false}
             ret,reply :=  rf.sendRequestVote(rf.members[idx],&args/* ,&reply */)
  
