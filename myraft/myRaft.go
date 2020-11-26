@@ -188,7 +188,8 @@ func (rf *Raft) updateLastApplied() {
 func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *RPC.RequestVoteReply, error ) {
    /*  rf.mu.Lock()
 	defer rf.mu.Unlock() */
-    if (args.Term > rf.currentTerm) {//all server rule 1 If RPC request or response contains term T > currentTerm:
+	fmt.Println("1---compare Term ", args.Term, rf.currentTerm)
+	if (args.Term > rf.currentTerm) {//all server rule 1 If RPC request or response contains term T > currentTerm:
     	fmt.Println("compare Term ", args.Term, rf.currentTerm)
     	fmt.Println("RequestVote BeFollower")
     	rf.beFollower(args.Term) // set currentTerm = T, convert to follower (§5.1)
@@ -711,14 +712,16 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 
 	fmt.Println("CONTEXT")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 	//var err error
 	reply, err := rf.client.RequestVote(ctx, args)
 	/* *reply.Term = *r.Term
 	*reply.VoteGranted = *r.VoteGranted */
+	if reply == nil {
+		fmt.Println("reply is nil")
+	}
 	if err != nil {
-		fmt.Println("FAIL ", &reply.VoteGranted)
 		fmt.Println(address, " requestVote fail")
 		return false, reply
 	}else{
