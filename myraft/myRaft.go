@@ -189,15 +189,22 @@ func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *R
    /*  rf.mu.Lock()
 	defer rf.mu.Unlock() */
     if (args.Term > rf.currentTerm) {//all server rule 1 If RPC request or response contains term T > currentTerm:
-        rf.beFollower(args.Term) // set currentTerm = T, convert to follower (§5.1)
+    	fmt.Println("compare Term ", args.Term, rf.currentTerm)
+    	fmt.Println("RequestVote BeFollower")
+    	rf.beFollower(args.Term) // set currentTerm = T, convert to follower (§5.1)
 	}
 	reply :=  &RPC.RequestVoteReply{}
     reply.Term = rf.currentTerm
     reply.VoteGranted = false
     if (args.Term < rf.currentTerm) || (rf.votedFor != NULL && rf.votedFor != args.CandidateId) {
+    	fmt.Println("Term ", args.Term,  rf.currentTerm)
+    	fmt.Println("votedFor", rf.votedFor)
+    	fmt.Println("votedFor", rf.votedFor)
         // Reply false if term < currentTerm (§5.1)  If votedFor is not null and not candidateId,
     } else if args.LastLogTerm < rf.getLastLogTerm() || (args.LastLogTerm == rf.getLastLogTerm() && args.LastLogIndex < rf.getLastLogIdx()){
-        //If the logs have last entries with different terms, then the log with the later term is more up-to-date.
+    	fmt.Println("lastLogTerm ", args.LastLogTerm, rf.getLastLogTerm())
+    	fmt.Println("lastLogIndex ", args.LastLogIndex, rf.getLastLogIdx())
+    	//If the logs have last entries with different terms, then the log with the later term is more up-to-date.
         // If the logs end with the same term, then whichever log is longer is more up-to-date.
         // Reply false if candidate’s log is at least as up-to-date as receiver’s log
     } else {
@@ -711,6 +718,7 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 	/* *reply.Term = *r.Term
 	*reply.VoteGranted = *r.VoteGranted */
 	if err != nil {
+		fmt.Println("FAIL ", &reply.VoteGranted)
 		fmt.Println(address, " requestVote fail")
 		return false, reply
 	}else{
