@@ -59,9 +59,8 @@ func (kv *KVServer) PutAppend(ctx context.Context,args *KV.PutAppendArgs) ( *KV.
 	}
 
 	apply := <- kv.applyCh
-	//fmt.Println(apply)
-
-	fmt.Println(index)
+	fmt.Println("apply ", apply)
+	fmt.Println("index", index)
 	if apply == 1{
 		
 	}
@@ -149,21 +148,17 @@ func main()  {
 	//}
 	
 	//server.applyCh = make(chan int, 1)
-	fmt.Println(server.applyCh)
+	fmt.Println("server.applyCh:", server.applyCh)
 
 	server.persist  = persist
 
 	// Members's address
 	members := strings.Split( *mems, ",")
 
-
-	fmt.Println(address, members)
-
-
+	fmt.Println("add+mem", address, members)
 
 	go server.RegisterServer(address+"1")
 	server.rf = myraft.MakeRaft(address , members ,persist, &server.mu,server.applyCh)
-	
 
 	time.Sleep(time.Second*1200)
 

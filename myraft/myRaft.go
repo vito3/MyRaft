@@ -710,7 +710,6 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 		return false, reply
 	}else{
 		return true, reply
-
 	}
 }
 
@@ -731,7 +730,7 @@ func MakeRaft(add string ,mem []string, persist *Per.Persister,
 	raft.members = make([]string, len(mem))
 	for i:= 0; i < len(mem)  ; i++{
 		raft.members[i] = mem[i]
-		fmt.Println(raft.members[i])
+		fmt.Println(i, raft.members[i])
 	}
 
 	raft.init()

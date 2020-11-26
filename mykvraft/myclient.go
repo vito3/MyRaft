@@ -67,7 +67,7 @@ func (ck *Clerk) Get(key string) string {
 			fmt.Println("can not connect ", ck.servers[id], "or it's not leader")
 		}
 		id = (id + 1) % len(ck.servers) 
-		
+
 	} 
 }
 
@@ -95,6 +95,7 @@ func (ck *Clerk) getValue(address string , args  *KV.GetArgs) (*KV.GetReply, boo
 func (ck *Clerk) Put(key string, value string) bool {
 	// You will have to modify this function.
 	args := &KV.PutAppendArgs{Key:key,Value:value,Op:"Put", Id:ck.id, Seq:ck.seq }
+	fmt.Printf("PUT- ck.leaderId:%d ck_id:%d seq:%d\n", ck.leaderId, ck.id, ck.seq)
 	id := ck.leaderId
 	for {
 		//fmt.Println(id)
@@ -102,10 +103,10 @@ func (ck *Clerk) Put(key string, value string) bool {
 		//fmt.Println(ok)
 
 		if (ok && reply.IsLeader){
-			ck.leaderId = id;
-			return true;
+			ck.leaderId = id
+			return true
 		}else{
-			fmt.Println(ok, "can not connect ", ck.servers[id], "or it's not leader")
+			fmt.Println(ok, "connect ", ck.servers[id], "or it's not leader")
 		}
 		id = (id + 1) % len(ck.servers) 
 	} 
@@ -158,18 +159,16 @@ func request(num int, servers []string)  {
 
 	for i:= 0; i <  len(servers); i++{
 		ck.servers[i] = servers[i] + "1"
-		//fmt.Println(ck.servers[i])
+		fmt.Printf("服务器名称：%s\n", ck.servers[i])
 	}
-
 
  	for i := 0; i < 50 ; i++ {
 		rand.Seed(time.Now().UnixNano())
 		key := "key" + strconv.Itoa(rand.Intn(100000))
 		value := "value"+ strconv.Itoa(rand.Intn(100000))
-		//ok := 
+
 		ck.Put(key,value)
-	//	fmt.Println(i ,"put   " ,value,ok )
-	//	fmt.Println(i, "get   " ,ck.Get(key) )
+
 		atomic.AddInt32(&count,1)
 		//count++
 	}
@@ -193,12 +192,10 @@ func main()  {
 	for i := 0; i < serverNumm ; i++ {
 		go  request(i, servers)		
 	} 
-	//request(1 , servers)		
+
 	//end_time := time.Now().UnixNano()
 
 	//t := end_time - begin_time
-	time.Sleep(time.Second * 3)
-	fmt.Println( count  / 3 )
 
 	time.Sleep(time.Second*1200)
 
