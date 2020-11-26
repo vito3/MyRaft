@@ -1,23 +1,22 @@
 package myraft
 
 import (
-	"log"
-	"net"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
-	"sync"
-	"google.golang.org/grpc/reflection"
 	RPC "../grpc/myraft"
 	Per "../persister"
+	"encoding/json"
 	"fmt"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+	"log"
+	"net"
+	"sync"
 	"sync/atomic"
 	"time"
-    "math/rand"
-    "encoding/json"
+	config "../config"
 	//"../labgob"
-    //"bytes"
-    "sort"
-    config "../config"
+	//"bytes"
+	"sort"
 
 	//"os"
 )
@@ -636,8 +635,8 @@ func (rf *Raft) init () {
                 return
             default:
             }
-            electionTime := time.Duration(rand.Intn(350) + 300) * time.Millisecond
-
+            //electionTime := time.Duration(rand.Intn(350) + 300) * time.Millisecond
+			electionTime := 2 * time.Second
            // rf.mu.Lock()
             state := rf.state
            // rf.mu.Unlock()
