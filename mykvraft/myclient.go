@@ -142,6 +142,7 @@ func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.P
 	//defer cancel()
 	reply, err := client.PutAppend(context.Background(), args)
 	if err != nil {
+		fmt.Println("putAppendValue nil")
 		fmt.Println(err)
 		return nil, false
 	}
