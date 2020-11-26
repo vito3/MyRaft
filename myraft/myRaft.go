@@ -724,7 +724,7 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 		fmt.Println("reply is nil")
 	}
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 		return false, reply
 	}else{
 		return true, reply
