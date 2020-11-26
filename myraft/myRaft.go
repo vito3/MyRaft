@@ -574,7 +574,8 @@ func (rf *Raft) startElection() {
     	 fmt.Println("election,cur_i", i)
     	 fmt.Println(rf.address, rf.members[i])
         if rf.address == rf.members[i] {
-            continue
+			fmt.Println("equal", rf.address, rf.members[i])
+			continue
         }
 		go func(idx int) { 
 			fmt.Println("sendRequestVote to :", rf.members[idx])
@@ -693,7 +694,7 @@ func (rf *Raft) Start(command interface{}) (int32, int32, bool) {
 func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool ,  *RPC.RequestVoteReply){
 	//fmt.
 	// Initialize Client
-	fmt.Println("start sendRequest")
+	fmt.Println("####startSendRequest####")
 	conn, err := grpc.Dial( address , grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		fmt.Println("Dial ", address, " error")
@@ -701,7 +702,7 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 	defer conn.Close()
 	rf.client = RPC.NewRAFTClient(conn)
 
-	fmt.Println("StartRequestVote")
+	fmt.Println("CONTEXT")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
