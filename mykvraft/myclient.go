@@ -106,7 +106,7 @@ func (ck *Clerk) Put(key string, value string) bool {
 			ck.leaderId = id
 			return true
 		}else{
-			fmt.Println(ok, "connect ", ck.servers[id], "or it's not leader")
+			fmt.Println(ok, "connect ", ck.servers[id], "leader?")
 		}
 		id = (id + 1) % len(ck.servers) 
 	} 
@@ -133,17 +133,17 @@ func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.P
 	// Initialize Client
 	conn, err := grpc.Dial( address , grpc.WithInsecure() )//,grpc.WithBlock())
 	if err != nil {
+		fmt.Println("PutAppend Dial fail: ", err)
 		return  nil, false
-		log.Printf(" did not connect: %v", err)
 	}
 	defer conn.Close()
 	client := KV.NewKVClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 1)
-	defer cancel()
-	reply, err := client.PutAppend(ctx,args)
+	//ctx, cancel := context.WithTimeout(context.Background(), time.Second * 1)
+	//defer cancel()
+	reply, err := client.PutAppend(context.Background(), args)
 	if err != nil {
-		return  nil, false
-		log.Printf("  putAppendValue could not greet: %v", err)
+		fmt.Println(err)
+		return nil, false
 	}
 	return reply, true
 }
@@ -154,15 +154,16 @@ func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.P
 var count   int32  = 0
 
 func request(num int, servers []string)  {
+	fmt.Println("Request Time: ", num)
 	ck := Clerk{}
 	ck.servers = make([]string, len(servers)) 
 
 	for i:= 0; i <  len(servers); i++{
-		ck.servers[i] = servers[i] + "1"
+		ck.servers[i] = servers[i] + "1" // 5000用于raft中的grpc监听
 		fmt.Printf("服务器名称：%s\n", ck.servers[i])
 	}
 
- 	for i := 0; i < 50 ; i++ {
+ 	for i := 0; i < 15 ; i++ {
 		rand.Seed(time.Now().UnixNano())
 		key := "key" + strconv.Itoa(rand.Intn(100000))
 		value := "value"+ strconv.Itoa(rand.Intn(100000))
@@ -186,11 +187,10 @@ func main()  {
 	flag.Parse()
 	servers := strings.Split( *ser, ",")
 
-	fmt.Println( "count" )
-	serverNumm := 100
+	serverNumm := 50
 	//begin_time := time.Now().UnixNano()
 	for i := 0; i < serverNumm ; i++ {
-		go  request(i, servers)		
+		go request(i, servers)
 	} 
 
 	//end_time := time.Now().UnixNano()

@@ -218,7 +218,7 @@ func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *R
 
 	}
 	// Debug TODO......
-	reply.VoteGranted = true
+	//reply.VoteGranted = true
 	return reply,nil
 } 
 
@@ -228,16 +228,22 @@ func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *R
 //Leader Section:
 func (rf *Raft) startAppendLog() {
     for i := 0; i < len(rf.members); i++ {
+		fmt.Println("appendLog, cur_i", i)
+		fmt.Println(rf.address, rf.members[i])
+    	if rf.address == rf.members[i] {
+			fmt.Println("equal", rf.address, rf.members[i])
+    		continue
+		}
         go func(idx int) {
             for {
-                rf.mu.Lock();
+                rf.mu.Lock()
                 if rf.state != Leader {
                     rf.mu.Unlock()
                     return
                 } //send initial empty AppendEntries RPCs (heartbeat) to each server
                 
                 appendLog := rf.log[rf.nextIndex[idx]:]
-                data, _ := json.Marshal(appendLog)
+                data, _ := json.Marshal(appendLog) //序列化
                /*  if len(appendLog) > 0{
                     fmt.Println(appendLog)
                 }
@@ -245,10 +251,7 @@ func (rf *Raft) startAppendLog() {
                 /* w := new(bytes.Buffer)
                 e := labgob.NewEncoder(w)
                 e.Encode(len(appendLog))
-
                 data := w.Bytes() */
-
-
 
                 args := RPC.AppendEntriesArgs{
                    Term: rf.currentTerm,
@@ -262,8 +265,10 @@ func (rf *Raft) startAppendLog() {
                 }
                 rf.mu.Unlock()
                  //:= &RPC.AppendEntriesReply{}
+                 fmt.Println("send AppendEntries to ", rf.members[idx])
                 reply, ret := rf.sendAppendEntries(rf.members[idx], &args)
-                rf.mu.Lock();
+
+                rf.mu.Lock()
                 if !ret || rf.state != Leader || rf.currentTerm != args.Term {
                     rf.mu.Unlock()
                     return
@@ -289,7 +294,7 @@ func (rf *Raft) startAppendLog() {
                             tarIndex = int32(i) //beyond the index of the last entry in that term in its log
                         }
                     }
-                    rf.nextIndex[idx] = tarIndex;
+                    rf.nextIndex[idx] = tarIndex
                     rf.mu.Unlock()
 				}
 			}	
@@ -301,21 +306,19 @@ func (rf *Raft) startAppendLog() {
 
 func (rf *Raft) sendAppendEntries(address string , args  *RPC.AppendEntriesArgs)(*RPC.AppendEntriesReply,bool){
 	// Initialize Client
-   // fmt.Println("sendAppendEntries")
+    fmt.Println("####start SendAppendEntries####")
     conn, err := grpc.Dial( address , grpc.WithInsecure(),grpc.WithBlock())
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		fmt.Println("sendAppendEntries Dial fail: ", err)
 	}
 	defer conn.Close()
 	rf.client = RPC.NewRAFTClient(conn)
-
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
+	//ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	//defer cancel()
 	//args := &RPC.AppendEntriesArgs{}
-	reply, err := rf.client.AppendEntries(ctx,args)
+	reply, err := rf.client.AppendEntries(context.Background(), args)
 	if err != nil {
-        fmt.Println(" sendAppendEntries could not greet: ", err, address)
+		fmt.Println(err)
         return reply ,false
     }
     return reply ,true
@@ -359,10 +362,9 @@ func (rf *Raft) AppendEntries(ctx context.Context, args *RPC.AppendEntriesArgs) 
         }
         return reply, nil
     }
-    
 
     var log []Log
-	json.Unmarshal(args.Log,&log)
+	json.Unmarshal(args.Log, &log) //反序列化
 
     /* r := bytes.NewBuffer(args.Log)
     d := labgob.NewDecoder(r)
@@ -374,7 +376,6 @@ func (rf *Raft) AppendEntries(ctx context.Context, args *RPC.AppendEntriesArgs) 
    /*  if len(log) > 0{
         fmt.Println(args.Term,"Append Log ",log)//.(config.Op))
     } */
-
 
     //2. Reply false if term < currentTerm (§5.1)
     if args.Term < rf.currentTerm {
@@ -394,7 +395,7 @@ func (rf *Raft) AppendEntries(ctx context.Context, args *RPC.AppendEntriesArgs) 
         rf.log = append(rf.log,log[i:]...) //4. Append any new entries not already in the log
        // rf.persist()
        //fmt.Println(args.Term,"Append RAft Log ",rf.log)
-        break;
+        break
     }
     //5. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
     if args.LeaderCommit > rf.commitIndex {
@@ -689,8 +690,8 @@ func (rf *Raft) Start(command interface{}) (int32, int32, bool) {
         }
         rf.log = append(rf.log,newLog)
        // rf.persist()
+       fmt.Println("Start log", newLog)
        rf.startAppendLog()
-
 	}
 	//fmt.Println("new Log",  rf.log)
     return index, term, isLeader
@@ -726,9 +727,8 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 	if err != nil {
 		fmt.Println(err)
 		return false, reply
-	}else{
-		return true, reply
 	}
+	return true, reply
 }
 
 

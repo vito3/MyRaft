@@ -40,16 +40,15 @@ type KVServer struct {
 
 
 func (kv *KVServer) PutAppend(ctx context.Context,args *KV.PutAppendArgs) ( *KV.PutAppendReply, error){
-	// Your code here.
-
 
 	//time.Sleep(time.Second)
-	reply := &KV.PutAppendReply{};
+	reply := &KV.PutAppendReply{}
 	_ , reply.IsLeader = kv.rf.GetState()
 	//reply.IsLeader = false;
 	if !reply.IsLeader{
 		return reply, nil
 	}
+
 	oringalOp := config.Op{args.Op, args.Key,args.Value, args.Id, args.Seq}
 	index, _, isLeader := kv.rf.Start(oringalOp)
 	if !isLeader {
