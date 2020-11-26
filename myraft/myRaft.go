@@ -693,6 +693,7 @@ func (rf *Raft) Start(command interface{}) (int32, int32, bool) {
 func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool ,  *RPC.RequestVoteReply){
 	//fmt.
 	// Initialize Client
+	fmt.Println("start sendRequest")
 	conn, err := grpc.Dial( address , grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		fmt.Println("Dial ", address, " error")
