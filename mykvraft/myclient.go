@@ -160,7 +160,8 @@ func request(num int, servers []string)  {
 	ck.servers = make([]string, len(servers)) 
 
 	for i:= 0; i <  len(servers); i++{
-		ck.servers[i] = servers[i] + "1" // 5000用于raft中的grpc监听
+		//ck.servers[i] = servers[i] + "1" // 5000用于raft中的grpc监听
+		ck.servers[i] = servers[i]
 		fmt.Printf("服务器名称：%s\n", ck.servers[i])
 	}
 
