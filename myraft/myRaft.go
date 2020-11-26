@@ -1,6 +1,7 @@
 package myraft
 
 import (
+	config "../config"
 	RPC "../grpc/myraft"
 	Per "../persister"
 	"encoding/json"
@@ -13,7 +14,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	config "../config"
 	//"../labgob"
 	//"bytes"
 	"sort"
@@ -712,10 +712,11 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 
 	fmt.Println("CONTEXT")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
-	defer cancel()
+	//ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+	//defer cancel()
 	//var err error
-	reply, err := rf.client.RequestVote(ctx, args)
+	//reply, err := rf.client.RequestVote(ctx, args)
+	reply, err := rf.client.RequestVote(context.Background(), args)
 	/* *reply.Term = *r.Term
 	*reply.VoteGranted = *r.VoteGranted */
 	if reply == nil {
