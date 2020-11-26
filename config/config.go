@@ -12,3 +12,9 @@ type Op struct {
 	Id int64
 	Seq int64
 }
+
+type ApplyMsg struct {
+	CommandValid bool
+	Command      interface{}
+	CommandIndex int32
+}

@@ -1,21 +1,20 @@
 package main
 
 import (
-	
-	"log"
-	"net"
+	config "../config"
+	KV "../grpc/mykv"
+	"../myraft"
+	Per "../persister"
+	"flag"
+	"fmt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"../myraft"
-	"sync"
-	"flag"
-	"time"
+	"log"
+	"net"
 	"strings"
-	"fmt"
-	Per "../persister"
-	config "../config"
-	KV "../grpc/mykv"
+	"sync"
+	"time"
 )
 
 
@@ -25,15 +24,15 @@ type KVServer struct {
 	mu      sync.Mutex
 	me      int
 	rf      *myraft.Raft
-	applyCh chan int
-	//applyCh chan raft.ApplyMsg
+	//applyCh chan int
+	applyCh chan config.ApplyMsg
 	dead    int32 // set by Kill()
 	maxraftstate int // snapshot if log grows this big
 
 	// Your definitions here.
-	Seq map[int64]int64
-	db map[string]string
-	chMap map[int]chan config.Op
+	cid2Seq map[int64]int64 //clientId -> maxSeq
+	db map[string]string // key -> value
+	chMap map[int]chan config.Op // index -> op
 	persist  *Per.Persister
 
 }
@@ -60,9 +59,7 @@ func (kv *KVServer) PutAppend(ctx context.Context,args *KV.PutAppendArgs) ( *KV.
 	apply := <- kv.applyCh
 	fmt.Println("apply ", apply)
 	fmt.Println("index", index)
-	if apply == 1{
-		
-	}
+
 	return reply, nil
 
 }
@@ -127,7 +124,6 @@ func (kv *KVServer) RegisterServer(address string)  {
 }
 
 
-
 func main()  {
 
 	var add = flag.String("address", "", "Input Your address")
@@ -141,23 +137,27 @@ func main()  {
 
 	persist := &Per.Persister{}
 	persist.Init("../db/"+address)
-	
-	//for i := 0; i <= int (address[ len(address) - 1] - '0'); i++{
-	server.applyCh = make(chan int, 1)
-	//}
-	
-	//server.applyCh = make(chan int, 1)
-	fmt.Println("server.applyCh:", server.applyCh)
-
-	server.persist  = persist
 
 	// Members's address
 	members := strings.Split( *mems, ",")
-
 	fmt.Println("add+mem", address, members)
+	
+	//for i := 0; i <= int (address[ len(address) - 1] - '0'); i++{
+	//server.applyCh = make(chan int, 1)
+	//}
 
+	//server.applyCh = make(chan int, 1) // 原代码只保留了此句
+	//fmt.Println("server.applyCh:", server.applyCh)
+	server.applyCh = make(chan config.ApplyMsg)
 	go server.RegisterServer(address+"1")
-	server.rf = myraft.MakeRaft(address , members ,persist, &server.mu,server.applyCh)
+	server.rf = myraft.MakeRaft(address , members ,persist, &server.mu, server.applyCh)
+	server.chMap = make(map[int]chan config.Op)
+	server.cid2Seq = make(map[int64]int64)
+	server.db = make(map[string]string)
+	server.persist  = persist
+
+
+
 
 	time.Sleep(time.Second*1200)
 

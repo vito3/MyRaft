@@ -66,7 +66,8 @@ type Raft struct {
     matchIndex  []int32 // "for each server,index of highest log entry known to be replicated on server(initialized to 0, im)"
 
     //channel
-    applyCh     chan int // from Make()
+    //applyCh     chan int // from Make()
+    applyCh chan config.ApplyMsg
     killCh      chan bool //for Kill()
     //handle rpc
     voteCh      chan bool
@@ -160,12 +161,12 @@ func (rf *Raft) updateLastApplied() {
     for rf.lastApplied < rf.commitIndex {
         rf.lastApplied++
         curLog := rf.log[rf.lastApplied]
-       /*  applyMsg := ApplyMsg{
+        applyMsg := config.ApplyMsg{
             true,
             curLog.Command,
             rf.lastApplied,
-        } */
-        m := curLog.Command//.(config.Op)
+        }
+        /*m := curLog.Command//.(config.Op)
         if m.Option == "Put"{
           //  fmt.Println("Put key value :", m.Key, m.Value)//, curLog.Command.(config.Op).Key,"value",curLog.Command.(config.Op).Value  )
           //  rf.mu.Lock()
@@ -173,13 +174,11 @@ func (rf *Raft) updateLastApplied() {
             if rf.state == Leader{
                 rf.applyCh <- 1
             }
-           
-            
           //  rf.mu.Unlock()
            // rf.persist.PrintStrVal("key1")
         }
-      
-        // rf.applyCh <- applyMsg
+        */
+        rf.applyCh <- applyMsg
     }
 }
 
@@ -634,8 +633,6 @@ func (rf *Raft) init () {
     rf.appendLogCh = make(chan bool,1)
     rf.killCh = make(chan bool,1)
 
-	
-
 	heartbeatTime := time.Duration(150) * time.Millisecond
 	go func() {
         for {
@@ -733,12 +730,11 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 
 
 func MakeRaft(add string ,mem []string, persist *Per.Persister, 
-    mu *sync.Mutex, applyCh chan int) *Raft {
+    mu *sync.Mutex, applyCh chan config.ApplyMsg) *Raft {
 	raft := &Raft{}
 	if (len(mem) <= 1 ){
 		panic("#######Address is less 1, you should set follower's address!######")
 	}
-
 
     raft.address = add
     raft.persist = persist
