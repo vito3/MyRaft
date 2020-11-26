@@ -644,7 +644,7 @@ func (rf *Raft) init () {
             default:
             }
             //electionTime := time.Duration(rand.Intn(350) + 300) * time.Millisecond
-			electionTime := 2 * time.Second
+			electionTime := 4 * time.Second
            // rf.mu.Lock()
             state := rf.state
            // rf.mu.Unlock()
@@ -717,13 +717,14 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 	//var err error
 	//reply, err := rf.client.RequestVote(ctx, args)
 	reply, err := rf.client.RequestVote(context.Background(), args)
+
 	/* *reply.Term = *r.Term
 	*reply.VoteGranted = *r.VoteGranted */
 	if reply == nil {
 		fmt.Println("reply is nil")
 	}
 	if err != nil {
-		fmt.Println(address, " requestVote fail")
+		panic(err)
 		return false, reply
 	}else{
 		return true, reply
