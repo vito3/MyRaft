@@ -694,12 +694,12 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 	// Initialize Client
 	conn, err := grpc.Dial( address , grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		fmt.Println("Dial ", address, " error")
 	}
 	defer conn.Close()
 	rf.client = RPC.NewRAFTClient(conn)
 
-	//fmt.Println("StartRequestVote")
+	fmt.Println("StartRequestVote")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -708,6 +708,7 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 	/* *reply.Term = *r.Term
 	*reply.VoteGranted = *r.VoteGranted */
 	if err != nil {
+		fmt.Println(address, " requestVote fail")
 		return false, reply
 	}else{
 		return true, reply
