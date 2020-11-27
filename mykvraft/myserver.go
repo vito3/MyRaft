@@ -152,7 +152,6 @@ func main()  {
 	flag.Parse()
 
 	server := KVServer{}
-
 	// Local address	
 	address := *add
 
@@ -161,11 +160,7 @@ func main()  {
 
 	// Members's address
 	members := strings.Split( *mems, ",")
-	fmt.Println("add+mem", address, members)
-	
-	//for i := 0; i <= int (address[ len(address) - 1] - '0'); i++{
-	//server.applyCh = make(chan int, 1)
-	//}
+	//fmt.Println("add+mem", address, members)
 
 	//server.applyCh = make(chan int, 1) // 原代码只保留了此句
 	//fmt.Println("server.applyCh:", server.applyCh)
@@ -184,11 +179,17 @@ func main()  {
 			server.mu.Lock()
 			maxSeq,found := server.cid2Seq[op.Id]
 			if !found || op.Seq>maxSeq {//未出现或者该客户端看到的最大序列号小于op的序列号
-				log.Print(op.Id, maxSeq, op.Seq)
+				if found {
+					fmt.Println("Found! p Info: ", op.Id, maxSeq, op.Seq)
+				} else {
+					fmt.Println(op.Id, "Not found")
+				}
 				switch op.Option {
 				case "Put":
+					fmt.Println("Put Op ", op.Key, op.Value)
 					server.db[op.Key] = op.Value
 				case "Append":
+					fmt.Println("Append Op ", op.Key, op.Value)
 					server.db[op.Key] += op.Value
 				}
 				server.cid2Seq[op.Id] = op.Seq //每个客户机看到的最大的序列号

@@ -57,14 +57,14 @@ func (ck *Clerk) Get(key string) string {
 	args := &KV.GetArgs{Key:key}
 	id := ck.leaderId
 	for {
-		fmt.Println(id)
+		//fmt.Println(id)
 		reply, ok := ck.getValue(ck.servers[id], args)
-		fmt.Println(reply.IsLeader)
+		//fmt.Println(reply.IsLeader)
 		if (ok && reply.IsLeader){
-			ck.leaderId = id;
-			return reply.Value;
+			ck.leaderId = id
+			return reply.Value
 		}else{
-			fmt.Println("can not connect ", ck.servers[id], "or it's not leader")
+			//fmt.Println("can not connect ", ck.servers[id], "or it's not leader")
 		}
 		id = (id + 1) % len(ck.servers) 
 
@@ -95,7 +95,7 @@ func (ck *Clerk) getValue(address string , args  *KV.GetArgs) (*KV.GetReply, boo
 func (ck *Clerk) Put(key string, value string) bool {
 	// You will have to modify this function.
 	args := &KV.PutAppendArgs{Key:key,Value:value,Op:"Put", Id:ck.id, Seq:ck.seq }
-	fmt.Printf("PUT- ck.leaderId:%d ck_id:%d seq:%d\n", ck.leaderId, ck.id, ck.seq)
+	//fmt.Printf("PUT- ck.leaderId:%d ck_id:%d seq:%d\n", ck.leaderId, ck.id, ck.seq)
 	id := ck.leaderId
 	for {
 		//fmt.Println(id)
@@ -149,39 +149,30 @@ func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.P
 	return reply, true
 }
 
-
-
-
 var count   int32  = 0
 
 func request(num int, servers []string)  {
-	fmt.Println("Request Time: ", num)
+	//fmt.Println("Request Time: ", num)
 	ck := Clerk{}
 	ck.servers = make([]string, len(servers)) 
 
 	for i:= 0; i <  len(servers); i++ {
-		ck.servers[i] = servers[i] + "1" // 5000用于raft中的grpc监听
+		ck.servers[i] = servers[i] + "1"
 		//ck.servers[i] = servers[i]
-		fmt.Printf("服务器名称：%s\n", ck.servers[i])
+		//fmt.Printf("服务器名称：%s\n", ck.servers[i])
 	}
 
  	for i := 0; i < 15 ; i++ {
 		rand.Seed(time.Now().UnixNano())
 		key := "key" + strconv.Itoa(rand.Intn(100000))
 		value := "value"+ strconv.Itoa(rand.Intn(100000))
-
+		fmt.Println("Try to Put: ", key, value)
 		ck.Put(key,value)
 
 		atomic.AddInt32(&count,1)
 		//count++
 	}
 }
-
-
-func requesttest()  {
-	
-}
-
 
 func main()  {
 

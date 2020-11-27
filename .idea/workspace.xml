@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="2d4c3e80-ea87-4118-9179-56ba506d7a69" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mykvraft/myclient.go" beforeDir="false" afterPath="$PROJECT_DIR$/mykvraft/myclient.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mykvraft/myserver.go" beforeDir="false" afterPath="$PROJECT_DIR$/mykvraft/myserver.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
