@@ -636,8 +636,10 @@ func (rf *Raft) init () {
 	heartbeatTime := time.Duration(150) * time.Millisecond
 	go func() {
         for {
+        	fmt.Println("Init for..")
             select {
             case <-rf.killCh:
+            	fmt.Println("Raft init kill")
                 return
             default:
             }
@@ -646,6 +648,7 @@ func (rf *Raft) init () {
             rf.mu.Lock()
             state := rf.state
             rf.mu.Unlock()
+            fmt.Println("State ", state)
             switch state {
             case Follower, Candidate:
                 select {
