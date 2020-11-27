@@ -138,9 +138,10 @@ func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.P
 	}
 	defer conn.Close()
 	client := KV.NewKVClient(conn)
-	//ctx, cancel := context.WithTimeout(context.Background(), time.Second * 1)
-	//defer cancel()
-	reply, err := client.PutAppend(context.Background(), args)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 1)
+	defer cancel()
+	//reply, err := client.PutAppend(context.Background(), args)
+	reply, err := client.PutAppend(ctx, args)
 	if err != nil {
 		fmt.Println("putAppendValue nil")
 		fmt.Println(err)

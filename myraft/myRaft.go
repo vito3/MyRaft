@@ -635,9 +635,7 @@ func (rf *Raft) init () {
     fmt.Println("In Raft init()")
 	heartbeatTime := time.Duration(150) * time.Millisecond
 	go func() {
-		fmt.Println("raft init go")
         for {
-        	fmt.Println("Init for..")
             select {
             case <-rf.killCh:
             	fmt.Println("Raft init kill")

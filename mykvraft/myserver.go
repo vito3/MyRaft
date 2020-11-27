@@ -175,7 +175,6 @@ func main()  {
 
 	go func() {
 		for  {
-			fmt.Println("server go for")
 			applyMsg := <- server.applyCh
 			op := applyMsg.Command.(config.Op)
 			server.mu.Lock()
