@@ -632,7 +632,7 @@ func (rf *Raft) init () {
     rf.voteCh = make(chan bool,1)
     rf.appendLogCh = make(chan bool,1)
     rf.killCh = make(chan bool,1)
-
+    fmt.Println("In Raft init()")
 	heartbeatTime := time.Duration(150) * time.Millisecond
 	go func() {
         for {
@@ -643,9 +643,9 @@ func (rf *Raft) init () {
             }
             //electionTime := time.Duration(rand.Intn(350) + 300) * time.Millisecond
 			electionTime := 4 * time.Second
-           // rf.mu.Lock()
+            rf.mu.Lock()
             state := rf.state
-           // rf.mu.Unlock()
+            rf.mu.Unlock()
             switch state {
             case Follower, Candidate:
                 select {
@@ -744,9 +744,10 @@ func MakeRaft(add string ,mem []string, persist *Per.Persister,
 	raft.members = make([]string, len(mem))
 	for i:= 0; i < len(mem)  ; i++{
 		raft.members[i] = mem[i]
-		fmt.Println(i, raft.members[i])
+		fmt.Println("MakeRaft", i, raft.members[i])
 	}
 
 	raft.init()
+
 	return raft
 } 

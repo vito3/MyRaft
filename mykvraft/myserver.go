@@ -167,6 +167,7 @@ func main()  {
 	server.applyCh = make(chan config.ApplyMsg)
 	go server.RegisterServer(address+"1")
 	server.rf = myraft.MakeRaft(address , members ,persist, &server.mu, server.applyCh)
+
 	server.chMap = make(map[int]chan config.Op)
 	server.cid2Seq = make(map[int64]int64)
 	server.db = make(map[string]string)
@@ -174,6 +175,7 @@ func main()  {
 
 	go func() {
 		for  {
+
 			applyMsg := <- server.applyCh
 			op := applyMsg.Command.(config.Op)
 			server.mu.Lock()
