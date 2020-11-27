@@ -669,7 +669,6 @@ func (rf *Raft) init () {
 
 	// Add New 
 
-
 	go  rf.RegisterServer(rf.address)
 	
 }
@@ -749,8 +748,6 @@ func MakeRaft(add string ,mem []string, persist *Per.Persister,
 		raft.members[i] = mem[i]
 		fmt.Println("MakeRaft", i, raft.members[i])
 	}
-
 	raft.init()
-
 	return raft
 } 
