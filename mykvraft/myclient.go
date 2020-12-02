@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -148,17 +149,15 @@ func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.P
 
 var count int32  = 0
 
-func (ck *Clerk) request(num int, servers []string)  {
+func (ck *Clerk) request(num int)  {
 	fmt.Println("#####Request Time: ", num, " #####")
 	//ck := Clerk{}
 	//ck.servers = make([]string, len(servers))
 	// 循环client num次，此处client num=15
  	for i := 0; i < 15 ; i++ {
-		//rand.Seed(time.Now().UnixNano())
-		//key := "key" + strconv.Itoa(rand.Intn(100000))
-		//value := "value"+ strconv.Itoa(rand.Intn(100000))
-		key := "key" + strconv.Itoa(i)
-		value := "value" + strconv.Itoa(i)
+		rand.Seed(time.Now().UnixNano())
+		key := "key" + strconv.Itoa(rand.Intn(100000))
+		value := "value"+ strconv.Itoa(rand.Intn(100000))
 		fmt.Println("Client ", i,  ", try to put: ", "[", key, "]", "-[", value, "]")
 		ck.Put(key,value)
 		atomic.AddInt32(&count,1)
@@ -174,13 +173,13 @@ func main()  {
 	serverNumm := 15
 	for i := 0; i < serverNumm ; i++ {
 		ck := MakeClerk(servers)
-		ck.mu.Lock()
+		//ck.mu.Lock()
 		for i:= 0; i < len(servers); i++ {
 			ck.servers[i] = servers[i] + "1"
 		}
-		fmt.Println(ck.servers)
+		//fmt.Println(i, ck.servers)
 		ck.mu.Unlock()
-		go ck.request(i, servers)
+		go ck.request(i)
 	}
 
 	time.Sleep(time.Second*1200)
