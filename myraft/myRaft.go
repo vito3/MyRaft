@@ -215,8 +215,9 @@ func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *R
         send(rf.voteCh) //because If election timeout elapses without receiving granting vote to candidate, so wake up
 
 	}
-	// Debug TODO......
+	// Debug
 	//reply.VoteGranted = true
+	fmt.Println("-----------------------")
 	return reply,nil
 } 
 
