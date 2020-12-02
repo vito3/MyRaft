@@ -173,6 +173,7 @@ func main()  {
 	serverNumm := 15
 	for i := 0; i < serverNumm ; i++ {
 		ck := MakeClerk(servers)
+		fmt.Println("start ", ck.servers)
 		//ck.mu.Lock()
 		for i:= 0; i < len(servers); i++ {
 			ck.servers[i] = servers[i] + "1"
