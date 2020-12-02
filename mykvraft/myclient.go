@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -21,6 +22,7 @@ import (
 	//"math/rand"
 )
 type Clerk struct {
+	mu      sync.Mutex
 	servers []string
 	// You will have to modify this struct.
 	leaderId int
@@ -146,18 +148,10 @@ func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.P
 
 var count int32  = 0
 
-func request(num int, servers []string)  {
+func (ck *Clerk) request(num int, servers []string)  {
 	fmt.Println("#####Request Time: ", num, " #####")
 	//ck := Clerk{}
 	//ck.servers = make([]string, len(servers))
-
-	ck := MakeClerk(servers)
-
-	for i:= 0; i < len(servers); i++ {
-		ck.servers[i] = servers[i] + "1"
-		fmt.Println(ck.servers)
-	}
-
 	// 循环client num次，此处client num=15
  	for i := 0; i < 15 ; i++ {
 		//rand.Seed(time.Now().UnixNano())
@@ -179,7 +173,14 @@ func main()  {
 
 	serverNumm := 50
 	for i := 0; i < serverNumm ; i++ {
-		go request(i, servers)
+		ck := MakeClerk(servers)
+		ck.mu.Lock()
+		for i:= 0; i < len(servers); i++ {
+			ck.servers[i] = servers[i] + "1"
+			fmt.Println(ck.servers)
+		}
+		ck.mu.Unlock()
+		go ck.request(i, servers)
 	}
 
 	time.Sleep(time.Second*1200)
