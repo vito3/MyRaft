@@ -178,6 +178,8 @@ func main()  {
 			ck.servers[i] = servers[i] + "1"
 		}
 		fmt.Println(i, ck.servers)
+		fmt.Println(servers)
+
 		//ck.mu.Unlock()
 		go ck.request(i)
 	}
