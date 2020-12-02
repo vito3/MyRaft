@@ -42,11 +42,13 @@ func makeSeed() int64 {
 
 func MakeClerk(servers []string) *Clerk {
 	ck := new(Clerk)
+
 	ck.servers = make([]string, len(servers))
 	serversNum := len(servers)
 	for i := 0; i < serversNum; i++ {
 		ck.servers[i] = servers[i] + "1"
 	}
+
 	ck.id = makeSeed()
 	ck.seq = 0
 	return ck
@@ -91,48 +93,61 @@ func (ck *Clerk) getValue(address string , args  *KV.GetArgs) (*KV.GetReply, boo
 
 
 
-func (ck *Clerk) Put(key string, value string) bool {
-	// You will have to modify this function.
+func (ck *Clerk) Put(pid string, key string, value string) bool {
+	fmt.Println("###### ", pid, "Enter Client Put() ######")
 	args := &KV.PutAppendArgs{Key:key,Value:value,Op:"Put", Id:ck.id, Seq:ck.seq }
-	//fmt.Printf("PUT- ck.leaderId:%d ck_id:%d seq:%d\n", ck.leaderId, ck.id, ck.seq)
-	id := ck.leaderId
+	//fmt.Printf("PUT - ck.leadepid:%d ck_id:%d seq:%d\n", ck.leaderId, ck.id, ck.seq)
+	fmt.Println("PUT- ", pid, "Info-", args)
+	id := ck.leaderId //初识为0
 	for {
-		//fmt.Println(id)
-		reply, ok := ck.putAppendValue(ck.servers[id], args)
-		//fmt.Println(ok)
-
-		if (ok && reply.IsLeader){
+		reply, ok := ck.putAppendValue(pid, ck.servers[id], args)
+		if ok && reply.IsLeader {
 			ck.leaderId = id
+			fmt.Println("PUT- ", pid, "successfully find leader ", id)
 			return true
 		}else{
-			fmt.Println(ok, "connect ", ck.servers[id], "leader?")
+			if !ok {
+				fmt.Println("PUT- ", pid, "putAppendValue() return false")
+			}
+			if !reply.IsLeader {
+				fmt.Println("PUT- ", pid, "find wrong leader")
+			}
+			//fmt.Println(ok, "connect ", ck.servers[id], "leader?")
 		}
 		id = (id + 1) % len(ck.servers) 
 	} 
 }
 
-
-
-func (ck *Clerk) Append(key string, value string) bool {
-	// You will have to modify this function.
+func (ck *Clerk) Append(aid string, key string, value string) bool {
+	fmt.Println("###### ", aid, "Enter Client Append() ######")
 	args := &KV.PutAppendArgs{Key:key,Value:value,Op:"Append", Id:ck.id, Seq:ck.seq }
+	fmt.Println("PUT- ", aid, "Info-", args)
 	id := ck.leaderId
 	for {
-		reply, ok := ck.putAppendValue(ck.servers[id], args)
-		if (ok && reply.IsLeader){
-			ck.leaderId = id;
+		reply, ok := ck.putAppendValue(aid, ck.servers[id], args)
+		if ok && reply.IsLeader {
+			ck.leaderId = id
+			fmt.Println("Append- ", aid, "successfully find leader ", id)
 			return true
+		}else{
+			if !ok {
+				fmt.Println("Append- ", aid, "putAppendValue() return false")
+			}
+			if !reply.IsLeader {
+				fmt.Println("Append- ", aid, "find wrong leader")
+			}
 		}
 		id = (id + 1) % len(ck.servers) 
 	} 
 }
 
 
-func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.PutAppendReply, bool){
+func (ck *Clerk) putAppendValue(rid string , address string , args  *KV.PutAppendArgs) (*KV.PutAppendReply, bool){
 	// Initialize Client
+	fmt.Println("###### ", rid, "Enter Client putAppendValue() ######")
 	conn, err := grpc.Dial( address , grpc.WithInsecure() )//,grpc.WithBlock())
 	if err != nil {
-		fmt.Println("PutAppend Dial fail: ", err)
+		fmt.Println("PutAppend- ", rid, "Dial fail: ", err)
 		return  nil, false
 	}
 	defer conn.Close()
@@ -142,8 +157,7 @@ func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.P
 	//reply, err := client.PutAppend(context.Background(), args)
 	reply, err := client.PutAppend(ctx, args)
 	if err != nil {
-		fmt.Println("putAppendValue nil")
-		fmt.Println(err)
+		fmt.Println("PutAppend- ", rid, "PutAppend() fail", err)
 		return nil, false
 	}
 	return reply, true
@@ -153,22 +167,24 @@ var count int32  = 0
 
 //func request(num int, servers []string)  {
 func (ck *Clerk) request(num int)  { //第num个client发起请求
-	fmt.Println("#####Request Time: ", num, " #####")
+	fmt.Println("###### Request Time: ", num, "######")
 	/*ck := Clerk{}
 	ck.servers = make([]string, len(servers))
 	for i:= 0; i < len(servers); i++ {
 		ck.servers[i] = servers[i] + "1"
 	}*/
 	fmt.Println(num, ck.servers)
-	// 循环client num次，此处client num=15
- 	for i := 0; i < 15 ; i++ {
+
+	requestNum := 5
+ 	for i := 0; i < requestNum ; i++ {
 		//rand.Seed(time.Now().UnixNano())
 		//key := "key" + strconv.Itoa(rand.Intn(100000))
 		//value := "value"+ strconv.Itoa(rand.Intn(100000))
- 		key := "key" + strconv.Itoa(num) + strconv.Itoa(i)
-		value := "value" + strconv.Itoa(num) + strconv.Itoa(i)
+ 		key := "key-" + strconv.Itoa(num) + "-" + strconv.Itoa(i)
+		value := "value-" + strconv.Itoa(num) + "-" + strconv.Itoa(i)
 		fmt.Println("Client ", num,  ", try to put: ", "[", key, "]", "- [", value, "]")
-		ck.Put(key,value)
+		rid := strconv.Itoa(num) + "-" + strconv.Itoa(i)
+		ck.Put(rid, key, value)
 		atomic.AddInt32(&count,1)
 	}
 }
@@ -179,7 +195,7 @@ func main()  {
 	flag.Parse()
 	servers := strings.Split( *ser, ",")
 
-	clientNum := 15
+	clientNum := 5
 	for i := 0; i < clientNum ; i++ {
 		ck := MakeClerk(servers)
 		go ck.request(i)
