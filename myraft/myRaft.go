@@ -703,7 +703,7 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 		fmt.Println("Dial ", address, " error")
 		panic(err)
 	}
-	fmt.Println(conn)
+	//fmt.Println(conn)
 	defer conn.Close()
 	rf.client = RPC.NewRAFTClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
@@ -714,7 +714,7 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 		fmt.Println("reply is nil")
 	}
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("sendRequestVote:", err)
 		return false, reply
 	}
 	return true, reply
@@ -735,8 +735,8 @@ func MakeRaft(add string ,mem []string, persist *Per.Persister,
 
 	raft.members = make([]string, len(mem))
 	for i:= 0; i < len(mem)  ; i++{
-		//raft.members[i] = mem[i]
-		raft.members[i] = mem[i] + "1"
+		raft.members[i] = mem[i]
+		//raft.members[i] = mem[i] + "1"
 		fmt.Println("MakeRaft", i, raft.members[i])
 	}
 	raft.init()
