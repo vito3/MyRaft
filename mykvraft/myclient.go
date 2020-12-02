@@ -97,20 +97,20 @@ func (ck *Clerk) Put(pid string, key string, value string) bool {
 	fmt.Println("###### ", pid, "Enter Client Put() ######")
 	args := &KV.PutAppendArgs{Key:key,Value:value,Op:"Put", Id:ck.id, Seq:ck.seq }
 	//fmt.Printf("PUT - ck.leadepid:%d ck_id:%d seq:%d\n", ck.leaderId, ck.id, ck.seq)
-	fmt.Println("PUT- ", pid, "Info-", args)
+	fmt.Println("PUT-", pid, "Info-", args)
 	id := ck.leaderId //初识为0
 	for {
 		reply, ok := ck.putAppendValue(pid, ck.servers[id], args)
 		if ok && reply.IsLeader {
 			ck.leaderId = id
-			fmt.Println("PUT- ", pid, "successfully find leader ", id)
+			fmt.Println("PUT-", pid, "successfully find leader ", id)
 			return true
 		}else{
 			if !ok {
-				fmt.Println("PUT- ", pid, "putAppendValue() return false")
+				fmt.Println("PUT-", pid, "putAppendValue() return false")
 			}
 			if !reply.IsLeader {
-				fmt.Println("PUT- ", pid, "find wrong leader")
+				fmt.Println("PUT-", pid, "find wrong leader")
 			}
 			//fmt.Println(ok, "connect ", ck.servers[id], "leader?")
 		}
@@ -121,20 +121,20 @@ func (ck *Clerk) Put(pid string, key string, value string) bool {
 func (ck *Clerk) Append(aid string, key string, value string) bool {
 	fmt.Println("###### ", aid, "Enter Client Append() ######")
 	args := &KV.PutAppendArgs{Key:key,Value:value,Op:"Append", Id:ck.id, Seq:ck.seq }
-	fmt.Println("PUT- ", aid, "Info-", args)
+	fmt.Println("Append-", aid, "Info-", args)
 	id := ck.leaderId
 	for {
 		reply, ok := ck.putAppendValue(aid, ck.servers[id], args)
 		if ok && reply.IsLeader {
 			ck.leaderId = id
-			fmt.Println("Append- ", aid, "successfully find leader ", id)
+			fmt.Println("Append-", aid, "successfully find leader ", id)
 			return true
 		}else{
 			if !ok {
-				fmt.Println("Append- ", aid, "putAppendValue() return false")
+				fmt.Println("Append-", aid, "putAppendValue() return false")
 			}
 			if !reply.IsLeader {
-				fmt.Println("Append- ", aid, "find wrong leader")
+				fmt.Println("Append-", aid, "find wrong leader")
 			}
 		}
 		id = (id + 1) % len(ck.servers) 
@@ -147,7 +147,7 @@ func (ck *Clerk) putAppendValue(rid string , address string , args  *KV.PutAppen
 	fmt.Println("###### ", rid, "Enter Client putAppendValue() ######")
 	conn, err := grpc.Dial( address , grpc.WithInsecure() )//,grpc.WithBlock())
 	if err != nil {
-		fmt.Println("PutAppend- ", rid, "Dial fail: ", err)
+		fmt.Println("PutAppend-", rid, "Dial fail: ", err)
 		return  nil, false
 	}
 	defer conn.Close()
@@ -157,7 +157,7 @@ func (ck *Clerk) putAppendValue(rid string , address string , args  *KV.PutAppen
 	//reply, err := client.PutAppend(context.Background(), args)
 	reply, err := client.PutAppend(ctx, args)
 	if err != nil {
-		fmt.Println("PutAppend- ", rid, "PutAppend() fail", err)
+		fmt.Println("PutAppend-", rid, "PutAppend() fail", err)
 		return nil, false
 	}
 	return reply, true
@@ -167,7 +167,7 @@ var count int32  = 0
 
 //func request(num int, servers []string)  {
 func (ck *Clerk) request(num int)  { //第num个client发起请求
-	fmt.Println("###### Request Time: ", num, "######")
+	fmt.Println("###### Request Client: ", num, "######")
 	/*ck := Clerk{}
 	ck.servers = make([]string, len(servers))
 	for i:= 0; i < len(servers); i++ {
