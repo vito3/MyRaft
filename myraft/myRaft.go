@@ -577,7 +577,7 @@ func (rf *Raft) startElection() {
 	// TODO.....
 	var votes int32 = 1
     for i := 0; i < len(rf.members); i++ {
-    	 fmt.Println("Election:", rf.address, "mem:", rf.members[i])
+    	//fmt.Println("Election:", rf.address, "mem:", rf.members[i])
         if rf.address == rf.members[i] {
 			//fmt.Println("Election, address equal", rf.address, rf.members[i])
 			continue
@@ -585,7 +585,7 @@ func (rf *Raft) startElection() {
 		go func(idx int) { 
 			fmt.Println(rf.address, "sendRequestVote to :", rf.members[idx])
         	//reply := RPC.RequestVoteReply{Term:9999, VoteGranted: false}
-            ret,reply :=  rf.sendRequestVote(rf.members[idx],&args/* ,&reply */)
+            ret,reply :=  rf.sendRequestVote(rf.members[idx], &args/* ,&reply */)
  
             if ret {
                 rf.mu.Lock()
@@ -695,28 +695,21 @@ func (rf *Raft) Start(command interface{}) (int32, int32, bool) {
 
 
 
-func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool ,  *RPC.RequestVoteReply){
-	//fmt.
+func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool, *RPC.RequestVoteReply){
 	// Initialize Client
-	fmt.Println("####startSendRequest####")
-	conn, err := grpc.Dial( address , grpc.WithInsecure() /*grpc.WithBlock()*/)
+	//fmt.Println("###### StartSendRequest ######")
+	conn, err := grpc.Dial(address, grpc.WithInsecure() /*grpc.WithBlock()*/)
 	if err != nil {
 		fmt.Println("Dial ", address, " error")
+		panic(err)
 	}
+	fmt.Println(conn)
 	defer conn.Close()
-	fmt.Println("AFTER CONN")
 	rf.client = RPC.NewRAFTClient(conn)
-
-	fmt.Println("CONTEXT")
-
-	//ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
-	//defer cancel()
-	//var err error
-	//reply, err := rf.client.RequestVote(ctx, args)
-	reply, err := rf.client.RequestVote(context.Background(), args)
-
-	/* *reply.Term = *r.Term
-	*reply.VoteGranted = *r.VoteGranted */
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+	defer cancel()
+	reply, err := rf.client.RequestVote(ctx, args)
+	//reply, err := rf.client.RequestVote(context.Background(), args)
 	if reply == nil {
 		fmt.Println("reply is nil")
 	}
