@@ -165,7 +165,8 @@ func main()  {
 	//server.applyCh = make(chan int, 1) // 原代码只保留了此句
 	//fmt.Println("server.applyCh:", server.applyCh)
 	server.applyCh = make(chan config.ApplyMsg)
-	go server.RegisterServer(address+"1")
+	address += "1"
+	go server.RegisterServer(address)
 	server.rf = myraft.MakeRaft(address, members, persist, &server.mu, server.applyCh)
 
 	server.chMap = make(map[int]chan config.Op)
