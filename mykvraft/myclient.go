@@ -171,14 +171,14 @@ func main()  {
 	flag.Parse()
 	servers := strings.Split( *ser, ",")
 
-	serverNumm := 50
+	serverNumm := 15
 	for i := 0; i < serverNumm ; i++ {
 		ck := MakeClerk(servers)
 		ck.mu.Lock()
 		for i:= 0; i < len(servers); i++ {
 			ck.servers[i] = servers[i] + "1"
-			fmt.Println(ck.servers)
 		}
+		fmt.Println(ck.servers)
 		ck.mu.Unlock()
 		go ck.request(i, servers)
 	}
