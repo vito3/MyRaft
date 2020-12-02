@@ -4,16 +4,15 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"math/rand"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	KV "../grpc/mykv"
 	//"strconv"
 	"strings"
-	KV "../grpc/mykv"
 	//"google.golang.org/grpc/reflection"
 	crand "crypto/rand"
 	"math/big"
@@ -153,7 +152,7 @@ func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.P
 var count int32  = 0
 
 //func request(num int, servers []string)  {
-func (ck *Clerk) request(num int)  {
+func (ck *Clerk) request(num int)  { //第num个client发起请求
 	fmt.Println("#####Request Time: ", num, " #####")
 	/*ck := Clerk{}
 	ck.servers = make([]string, len(servers))
@@ -163,10 +162,12 @@ func (ck *Clerk) request(num int)  {
 	fmt.Println(num, ck.servers)
 	// 循环client num次，此处client num=15
  	for i := 0; i < 15 ; i++ {
-		rand.Seed(time.Now().UnixNano())
-		key := "key" + strconv.Itoa(rand.Intn(100000))
-		value := "value"+ strconv.Itoa(rand.Intn(100000))
-		fmt.Println("Client ", i,  ", try to put: ", "[", key, "]", "-[", value, "]")
+		//rand.Seed(time.Now().UnixNano())
+		//key := "key" + strconv.Itoa(rand.Intn(100000))
+		//value := "value"+ strconv.Itoa(rand.Intn(100000))
+ 		key := "key" + strconv.Itoa(num) + strconv.Itoa(i)
+		value := "value" + strconv.Itoa(num) + strconv.Itoa(i)
+		fmt.Println("Client ", i,  ", try to put: ", "[", key, "]", "- [", value, "]")
 		ck.Put(key,value)
 		atomic.AddInt32(&count,1)
 	}
@@ -178,8 +179,8 @@ func main()  {
 	flag.Parse()
 	servers := strings.Split( *ser, ",")
 
-	serverNumm := 15
-	for i := 0; i < serverNumm ; i++ {
+	clientNum := 15
+	for i := 0; i < clientNum ; i++ {
 		ck := MakeClerk(servers)
 		go ck.request(i)
 	}
