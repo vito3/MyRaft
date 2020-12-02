@@ -99,6 +99,7 @@ func (ck *Clerk) Put(pid string, key string, value string) bool {
 	//fmt.Printf("PUT - ck.leadepid:%d ck_id:%d seq:%d\n", ck.leaderId, ck.id, ck.seq)
 	fmt.Println("PUT-", pid, "Info-", args)
 	id := ck.leaderId //初识为0
+	fmt.Println(pid, args.Seq, id)
 	for {
 		reply, ok := ck.putAppendValue(pid, ck.servers[id], args)
 		if ok && reply.IsLeader {
