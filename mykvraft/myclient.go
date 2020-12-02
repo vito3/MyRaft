@@ -43,7 +43,7 @@ func makeSeed() int64 {
 
 func MakeClerk(servers []string) *Clerk {
 	ck := new(Clerk)
-	ck.servers = servers
+	//ck.servers = servers
 	ck.id = makeSeed()
 	ck.seq = 0
 	// You'll have to add code here.
