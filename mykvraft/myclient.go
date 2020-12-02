@@ -99,7 +99,7 @@ func (ck *Clerk) Put(pid string, key string, value string) bool {
 	//fmt.Printf("PUT - ck.leadepid:%d ck_id:%d seq:%d\n", ck.leaderId, ck.id, ck.seq)
 	fmt.Println("PUT-", pid, "Info-", args)
 	id := ck.leaderId //初识为0
-	fmt.Println(pid, args.Seq, id)
+	//fmt.Println(pid, args.Seq, id) // , 0, 0
 	for {
 		reply, ok := ck.putAppendValue(pid, ck.servers[id], args)
 		if ok && reply.IsLeader {
@@ -110,7 +110,7 @@ func (ck *Clerk) Put(pid string, key string, value string) bool {
 			if !ok {
 				fmt.Println("PUT-", pid, "putAppendValue() return false")
 			}
-			fmt.Println(pid, reply.IsLeader)
+			fmt.Println(pid, &reply.IsLeader)
 			/*if !reply.IsLeader {
 				fmt.Println("PUT-", pid, "find wrong leader")
 			}

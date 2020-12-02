@@ -40,7 +40,6 @@ type KVServer struct {
 
 func (kv *KVServer) PutAppend(ctx context.Context,args *KV.PutAppendArgs) ( *KV.PutAppendReply, error){
 
-	//time.Sleep(time.Second)
 	reply := &KV.PutAppendReply{}
 	_ , reply.IsLeader = kv.rf.GetState()
 	reply.IsLeader = false
