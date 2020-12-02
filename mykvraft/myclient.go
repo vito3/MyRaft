@@ -102,7 +102,7 @@ func (ck *Clerk) Put(pid string, key string, value string) bool {
 	//fmt.Println(pid, args.Seq, id) // , 0, 0
 	for {
 		reply, ok := ck.putAppendValue(pid, ck.servers[id], args)
-		if ok && reply.IsLeader {
+		if reply.IsLeader && ok {
 			ck.leaderId = id
 			fmt.Println("PUT-", pid, "successfully find leader ", id)
 			return true
@@ -110,7 +110,7 @@ func (ck *Clerk) Put(pid string, key string, value string) bool {
 			if !ok {
 				fmt.Println("PUT-", pid, "putAppendValue() return false")
 			}
-			fmt.Println(pid, &reply.IsLeader)
+			//fmt.Println(pid, &reply.IsLeader)
 			/*if !reply.IsLeader {
 				fmt.Println("PUT-", pid, "find wrong leader")
 			}
