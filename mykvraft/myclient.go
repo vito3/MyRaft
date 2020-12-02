@@ -167,7 +167,7 @@ func (ck *Clerk) request(num int)  { //第num个client发起请求
 		//value := "value"+ strconv.Itoa(rand.Intn(100000))
  		key := "key" + strconv.Itoa(num) + strconv.Itoa(i)
 		value := "value" + strconv.Itoa(num) + strconv.Itoa(i)
-		fmt.Println("Client ", i,  ", try to put: ", "[", key, "]", "- [", value, "]")
+		fmt.Println("Client ", num,  ", try to put: ", "[", key, "]", "- [", value, "]")
 		ck.Put(key,value)
 		atomic.AddInt32(&count,1)
 	}
