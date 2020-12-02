@@ -184,9 +184,9 @@ func (rf *Raft) updateLastApplied() {
 
  
 func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *RPC.RequestVoteReply, error ) {
-   /*  rf.mu.Lock()
-	defer rf.mu.Unlock() */
 	fmt.Println("1---compare Term ", args.Term, rf.currentTerm)
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
 	if (args.Term > rf.currentTerm) {//all server rule 1 If RPC request or response contains term T > currentTerm:
     	fmt.Println("compare Term ", args.Term, rf.currentTerm)
     	fmt.Println("RequestVote BeFollower")
