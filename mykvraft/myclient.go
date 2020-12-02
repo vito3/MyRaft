@@ -149,10 +149,14 @@ func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.P
 
 var count int32  = 0
 
-func (ck *Clerk) request(num int)  {
+func  request(num int, servers []string)  {
 	fmt.Println("#####Request Time: ", num, " #####")
-	//ck := Clerk{}
-	//ck.servers = make([]string, len(servers))
+	ck := Clerk{}
+	ck.servers = make([]string, len(servers))
+	for i:= 0; i < len(servers); i++ {
+		ck.servers[i] = servers[i] + "1"
+	}
+	fmt.Println(num, ck.servers)
 	// 循环client num次，此处client num=15
  	for i := 0; i < 15 ; i++ {
 		rand.Seed(time.Now().UnixNano())
@@ -172,16 +176,16 @@ func main()  {
 
 	serverNumm := 15
 	for i := 0; i < serverNumm ; i++ {
-		ck := MakeClerk(servers)
-		ck.servers = make([]string, len(servers))
+		//ck := MakeClerk(servers)
+		//ck.servers = make([]string, len(servers))
 		//ck.mu.Lock()
-		for i:= 0; i < len(servers); i++ {
-			ck.servers[i] = servers[i] + "1"
-		}
-		fmt.Println(i, ck.servers)
-		fmt.Println(servers)
+		//for i:= 0; i < len(servers); i++ {
+			//ck.servers[i] = servers[i] + "1"
+		//}
+		//fmt.Println(i, ck.servers)
+		//fmt.Println(servers)
 		//ck.mu.Unlock()
-		//go ck.request(i)
+		go request(i, servers)
 	}
 
 	time.Sleep(time.Second*1200)
