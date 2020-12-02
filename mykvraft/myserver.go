@@ -10,7 +10,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"log"
 	"net"
 	"strings"
 	"sync"
@@ -131,9 +130,9 @@ func (kv *KVServer) RegisterServer(address string)  {
 	for{
 
 		lis, err := net.Listen("tcp", address)
-		fmt.Println("myserver", address)
+		//fmt.Println("myserver", address)
 		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
+			fmt.Println("failed to listen:", err)
 		}
 		s := grpc.NewServer()
 		KV.RegisterKVServer(s, kv )
@@ -144,7 +143,6 @@ func (kv *KVServer) RegisterServer(address string)  {
 		}
 		
 	}
-	
 }
 
 
@@ -163,13 +161,12 @@ func main()  {
 
 	// Members's address
 	members := strings.Split( *mems, ",")
-	//fmt.Println("add+mem", address, members)
 
 	//server.applyCh = make(chan int, 1) // 原代码只保留了此句
 	//fmt.Println("server.applyCh:", server.applyCh)
 	server.applyCh = make(chan config.ApplyMsg)
 	go server.RegisterServer(address+"1")
-	server.rf = myraft.MakeRaft(address , members ,persist, &server.mu, server.applyCh)
+	server.rf = myraft.MakeRaft(address, members, persist, &server.mu, server.applyCh)
 
 	server.chMap = make(map[int]chan config.Op)
 	server.cid2Seq = make(map[int64]int64)

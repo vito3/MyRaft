@@ -9,7 +9,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"log"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -455,7 +454,7 @@ func (rf *Raft) RegisterServer(address string)  {
 
 		lis, err := net.Listen("tcp", address)
 		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
+			fmt.Println("failed to listen: %v", err)
 		}
 		s := grpc.NewServer()
 		RPC.RegisterRAFTServer(s, rf )
@@ -566,7 +565,7 @@ func (rf *Raft) GetState() (int32, bool) {
 //If election timeout elapses: start new election handled in caller
 func (rf *Raft) startElection() {
 
-    fmt.Println("startElection")
+    fmt.Println("####### StartElection ######")
 
     args := RPC.RequestVoteArgs{
         Term: rf.currentTerm,
@@ -578,22 +577,21 @@ func (rf *Raft) startElection() {
 	// TODO.....
 	var votes int32 = 1
     for i := 0; i < len(rf.members); i++ {
-    	 fmt.Println("election,cur_i", i)
-    	 fmt.Println(rf.address, rf.members[i])
+    	 fmt.Println("Election:", rf.address, "mem:", rf.members[i])
         if rf.address == rf.members[i] {
-			fmt.Println("equal", rf.address, rf.members[i])
+			//fmt.Println("Election, address equal", rf.address, rf.members[i])
 			continue
         }
 		go func(idx int) { 
-			fmt.Println("sendRequestVote to :", rf.members[idx])
+			fmt.Println(rf.address, "sendRequestVote to :", rf.members[idx])
         	//reply := RPC.RequestVoteReply{Term:9999, VoteGranted: false}
             ret,reply :=  rf.sendRequestVote(rf.members[idx],&args/* ,&reply */)
  
             if ret {
-                /* rf.mu.Lock()
-                defer rf.mu.Unlock() */
+                rf.mu.Lock()
+                defer rf.mu.Unlock()
                 if reply.Term > rf.currentTerm {
-					fmt.Println( "reply.beFollower ")
+					fmt.Println( "Election: rf beFollower ")
                     rf.beFollower(reply.Term)
                     return
                 }
@@ -602,10 +600,10 @@ func (rf *Raft) startElection() {
 					return
                 }
                 if reply.VoteGranted {
-					fmt.Println( "#########reply.VoteGranted ############3")
+					fmt.Println( "Election: rf VoteGranted true")
                     atomic.AddInt32(&votes,1)
 				}else{
-					fmt.Println( "#########reply.VoteGranted false ", reply.Term)
+					fmt.Println( "Election: rf VoteGranted false ", reply.Term)
 				}
                 if atomic.LoadInt32(&votes) > int32(len(rf.members) / 2) {
 					rf.beLeader()
@@ -632,7 +630,7 @@ func (rf *Raft) init () {
     rf.voteCh = make(chan bool,1)
     rf.appendLogCh = make(chan bool,1)
     rf.killCh = make(chan bool,1)
-    fmt.Println("In Raft init()")
+    fmt.Println("###### Raft init() ######")
 	heartbeatTime := time.Duration(150) * time.Millisecond
 	go func() {
         for {
@@ -654,14 +652,14 @@ func (rf *Raft) init () {
                 case <-rf.voteCh:
                 case <-rf.appendLogCh:
                 case <-time.After(electionTime):
-                //    rf.mu.Lock()
+                	rf.mu.Lock()
                     fmt.Println("######## time.After(electionTime) #######")
                     rf.beCandidate() //becandidate, Reset election timer, then start election
-                //    rf.mu.Unlock()
+                    rf.mu.Unlock()
                 }
 			case Leader:
                 rf.startAppendLog()
-                time.Sleep(heartbeatTime )
+                time.Sleep(heartbeatTime)
             }
         }
     }()
@@ -744,7 +742,8 @@ func MakeRaft(add string ,mem []string, persist *Per.Persister,
 
 	raft.members = make([]string, len(mem))
 	for i:= 0; i < len(mem)  ; i++{
-		raft.members[i] = mem[i]
+		//raft.members[i] = mem[i]
+		raft.members[i] = mem[i] + "1"
 		fmt.Println("MakeRaft", i, raft.members[i])
 	}
 	raft.init()
