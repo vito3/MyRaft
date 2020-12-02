@@ -1,22 +1,21 @@
 package main
 
 import (
-	"log"
-	"time"
-	"fmt"
 	"flag"
+	"fmt"
+	"log"
 	"sync/atomic"
+	"time"
 
-	//"strconv"
-	"strings"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	//"strconv"
+	"strings"
+	KV "../grpc/mykv"
 	//"google.golang.org/grpc/reflection"
 	crand "crypto/rand"
 	"math/big"
-	KV "../grpc/mykv"
 	"strconv"
-	"math/rand"
 	//Per "../persister"
 
 	//"math/rand"
@@ -47,11 +46,6 @@ func MakeClerk(servers []string ) *Clerk {
 	// You'll have to add code here.
 	return ck
 }
-
-
-
-
-
 
 func (ck *Clerk) Get(key string) string {
 	args := &KV.GetArgs{Key:key}
@@ -150,28 +144,30 @@ func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.P
 	return reply, true
 }
 
-var count   int32  = 0
+var count int32  = 0
 
 func request(num int, servers []string)  {
-	//fmt.Println("Request Time: ", num)
-	ck := Clerk{}
-	ck.servers = make([]string, len(servers)) 
+	fmt.Println("#####Request Time: ", num, " #####")
+	//ck := Clerk{}
+	//ck.servers = make([]string, len(servers))
 
-	for i:= 0; i <  len(servers); i++ {
+	ck := MakeClerk(servers)
+
+	for i:= 0; i < len(servers); i++ {
 		ck.servers[i] = servers[i] + "1"
-		//ck.servers[i] = servers[i]
-		//fmt.Printf("服务器名称：%s\n", ck.servers[i])
+		fmt.Println(ck.servers)
 	}
 
+	// 循环client num次，此处client num=15
  	for i := 0; i < 15 ; i++ {
-		rand.Seed(time.Now().UnixNano())
-		key := "key" + strconv.Itoa(rand.Intn(100000))
-		value := "value"+ strconv.Itoa(rand.Intn(100000))
-		fmt.Println("Try to Put: ", key, value)
+		//rand.Seed(time.Now().UnixNano())
+		//key := "key" + strconv.Itoa(rand.Intn(100000))
+		//value := "value"+ strconv.Itoa(rand.Intn(100000))
+		key := "key" + strconv.Itoa(i)
+		value := "value" + strconv.Itoa(i)
+		fmt.Println("Client ", i,  ", try to put: ", "[", key, "]", "-[", value, "]")
 		ck.Put(key,value)
-
 		atomic.AddInt32(&count,1)
-		//count++
 	}
 }
 
@@ -182,16 +178,10 @@ func main()  {
 	servers := strings.Split( *ser, ",")
 
 	serverNumm := 50
-	//begin_time := time.Now().UnixNano()
 	for i := 0; i < serverNumm ; i++ {
 		go request(i, servers)
-	} 
-
-	//end_time := time.Now().UnixNano()
-
-	//t := end_time - begin_time
+	}
 
 	time.Sleep(time.Second*1200)
-
 
 }
