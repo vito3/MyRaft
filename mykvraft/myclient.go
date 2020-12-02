@@ -41,7 +41,7 @@ func makeSeed() int64 {
 }
 
 
-func MakeClerk(servers []string ) *Clerk {
+func MakeClerk(servers []string) *Clerk {
 	ck := new(Clerk)
 	ck.servers = servers
 	ck.id = makeSeed()
@@ -179,9 +179,8 @@ func main()  {
 		}
 		fmt.Println(i, ck.servers)
 		fmt.Println(servers)
-
 		//ck.mu.Unlock()
-		go ck.request(i)
+		//go ck.request(i)
 	}
 
 	time.Sleep(time.Second*1200)
