@@ -43,10 +43,13 @@ func makeSeed() int64 {
 
 func MakeClerk(servers []string) *Clerk {
 	ck := new(Clerk)
-	//ck.servers = servers
+	ck.servers = make([]string, len(servers))
+	serversNum := len(servers)
+	for i := 0; i < serversNum; i++ {
+		ck.servers[i] = servers[i] + "1"
+	}
 	ck.id = makeSeed()
 	ck.seq = 0
-	// You'll have to add code here.
 	return ck
 }
 
@@ -149,13 +152,14 @@ func (ck *Clerk) putAppendValue(address string , args  *KV.PutAppendArgs) (*KV.P
 
 var count int32  = 0
 
-func  request(num int, servers []string)  {
+//func request(num int, servers []string)  {
+func (ck *Clerk) request(num int)  {
 	fmt.Println("#####Request Time: ", num, " #####")
-	ck := Clerk{}
+	/*ck := Clerk{}
 	ck.servers = make([]string, len(servers))
 	for i:= 0; i < len(servers); i++ {
 		ck.servers[i] = servers[i] + "1"
-	}
+	}*/
 	fmt.Println(num, ck.servers)
 	// 循环client num次，此处client num=15
  	for i := 0; i < 15 ; i++ {
@@ -176,16 +180,8 @@ func main()  {
 
 	serverNumm := 15
 	for i := 0; i < serverNumm ; i++ {
-		//ck := MakeClerk(servers)
-		//ck.servers = make([]string, len(servers))
-		//ck.mu.Lock()
-		//for i:= 0; i < len(servers); i++ {
-			//ck.servers[i] = servers[i] + "1"
-		//}
-		//fmt.Println(i, ck.servers)
-		//fmt.Println(servers)
-		//ck.mu.Unlock()
-		go request(i, servers)
+		ck := MakeClerk(servers)
+		go ck.request(i)
 	}
 
 	time.Sleep(time.Second*1200)
