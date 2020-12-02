@@ -39,8 +39,9 @@ type KVServer struct {
 
 
 func (kv *KVServer) PutAppend(ctx context.Context,args *KV.PutAppendArgs) ( *KV.PutAppendReply, error){
-
-	reply := &KV.PutAppendReply{}
+	//var reply *KV.PutAppendReply
+	reply := new(KV.PutAppendReply)
+	//reply := KV.PutAppendReply{}
 	_ , reply.IsLeader = kv.rf.GetState()
 	reply.IsLeader = false
 	if !reply.IsLeader{
