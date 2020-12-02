@@ -39,24 +39,21 @@ type KVServer struct {
 
 
 func (kv *KVServer) PutAppend(ctx context.Context,args *KV.PutAppendArgs) ( *KV.PutAppendReply, error){
-	//var reply *KV.PutAppendReply
-	//reply := new(KV.PutAppendReply)
-	//reply := &KV.PutAppendReply{}
-	//reply.IsLeader = false
-	//reply.Success = false
-	//return reply, nil
 
+	fmt.Println("###### Enter Server PutAppend Handler ######")
 	reply := &KV.PutAppendReply{}
 	_ , reply.IsLeader = kv.rf.GetState()
 	reply.IsLeader = false
 	if !reply.IsLeader{
+		fmt.Println("PutAppend-Handler: wrong leader")
 		return reply, nil
 	}
 
 	originOp := config.Op{args.Op, args.Key,args.Value, args.Id, args.Seq}
+	fmt.Println("PutAppend-Handler: Op-", args)
 	index, _, isLeader := kv.rf.Start(originOp)
 	if !isLeader {
-		fmt.Println("Leader Changed !")
+		fmt.Println("PutAppend-Handler: Leader Changed !")
 		reply.IsLeader = false
 		return reply, nil
 	}

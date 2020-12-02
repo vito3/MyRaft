@@ -132,8 +132,7 @@ func (ck *Clerk) Append(aid string, key string, value string) bool {
 		}else{
 			if !ok {
 				fmt.Println("Append-", aid, "putAppendValue() return false")
-			}
-			if !reply.IsLeader {
+			} else {
 				fmt.Println("Append-", aid, "find wrong leader")
 			}
 		}
