@@ -42,6 +42,11 @@ func (kv *KVServer) PutAppend(ctx context.Context,args *KV.PutAppendArgs) ( *KV.
 	//var reply *KV.PutAppendReply
 	//reply := new(KV.PutAppendReply)
 	reply := &KV.PutAppendReply{}
+	reply.IsLeader = false
+	reply.Success = false
+	return reply, nil
+	/*
+	reply := &KV.PutAppendReply{}
 	_ , reply.IsLeader = kv.rf.GetState()
 	reply.IsLeader = false
 	if !reply.IsLeader{
@@ -66,6 +71,8 @@ func (kv *KVServer) PutAppend(ctx context.Context,args *KV.PutAppendArgs) ( *KV.
 		kv.mu.Unlock()
 	}
 	return reply, nil
+
+	 */
 }
 
 
