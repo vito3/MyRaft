@@ -706,7 +706,7 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 	//fmt.Println(conn)
 	defer conn.Close()
 	rf.client = RPC.NewRAFTClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 	reply, err := rf.client.RequestVote(ctx, args)
 	//reply, err := rf.client.RequestVote(context.Background(), args)
