@@ -102,19 +102,16 @@ func (ck *Clerk) Put(pid string, key string, value string) bool {
 	//fmt.Println(pid, args.Seq, id) // , 0, 0
 	for {
 		reply, ok := ck.putAppendValue(pid, ck.servers[id], args)
-		if reply.IsLeader && ok {
+		if ok && reply.IsLeader {
 			ck.leaderId = id
 			fmt.Println("PUT-", pid, "successfully find leader ", id)
 			return true
 		}else{
 			if !ok {
 				fmt.Println("PUT-", pid, "putAppendValue() return false")
-			}
-			//fmt.Println(pid, &reply.IsLeader)
-			/*if !reply.IsLeader {
+			} else { //reply为空，不可直接取 reply.IsLeader
 				fmt.Println("PUT-", pid, "find wrong leader")
 			}
-			 */
 			//fmt.Println(ok, "connect ", ck.servers[id], "leader?")
 		}
 		id = (id + 1) % len(ck.servers) 
