@@ -177,7 +177,7 @@ func main()  {
 		for i:= 0; i < len(servers); i++ {
 			ck.servers[i] = servers[i] + "1"
 		}
-		//fmt.Println(i, ck.servers)
+		fmt.Println(i, ck.servers)
 		//ck.mu.Unlock()
 		go ck.request(i)
 	}
