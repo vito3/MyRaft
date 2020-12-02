@@ -710,14 +710,15 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 	defer cancel()
 	reply, err := rf.client.RequestVote(ctx, args)
 	//reply, err := rf.client.RequestVote(context.Background(), args)
-	if reply == nil {
-		fmt.Println("reply is nil")
-		return false, reply
-	}
 	if err != nil {
 		fmt.Println("sendRequestVote:", err)
 		return false, reply
 	}
+	if reply == nil {
+		fmt.Println("reply is nil")
+		return false, reply
+	}
+
 	return true, reply
 }
 
