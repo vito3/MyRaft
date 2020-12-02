@@ -109,9 +109,11 @@ func (ck *Clerk) Put(pid string, key string, value string) bool {
 			if !ok {
 				fmt.Println("PUT-", pid, "putAppendValue() return false")
 			}
-			if !reply.IsLeader {
+			fmt.Println(pid, reply.IsLeader)
+			/*if !reply.IsLeader {
 				fmt.Println("PUT-", pid, "find wrong leader")
 			}
+			 */
 			//fmt.Println(ok, "connect ", ck.servers[id], "leader?")
 		}
 		id = (id + 1) % len(ck.servers) 
