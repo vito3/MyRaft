@@ -186,7 +186,7 @@ func (rf *Raft) updateLastApplied() {
 func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *RPC.RequestVoteReply, error ) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	fmt.Println("1---compare Term send receiver ", args.Term, rf.currentTerm)
+	fmt.Println("compare Term send receiver ", args.Term, rf.currentTerm)
 	if (args.Term > rf.currentTerm) {//all server rule 1 If RPC request or response contains term T > currentTerm:
     	fmt.Println("RequestVote receiver", rf.address, "BeFollower")
     	rf.beFollower(args.Term) // set currentTerm = T, convert to follower (§5.1)
@@ -705,11 +705,11 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 	reply, err := rf.client.RequestVote(ctx, args)
 	//reply, err := rf.client.RequestVote(context.Background(), args)
 	if err != nil {
-		fmt.Println("sendRequestVote:", err)
+		//fmt.Println("sendRequestVote:", err)
 		return false, reply
 	}
 	if reply == nil {
-		fmt.Println("reply is nil")
+		//fmt.Println("reply is nil")
 		return false, reply
 	}
 
