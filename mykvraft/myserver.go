@@ -165,7 +165,7 @@ func main()  {
 	//fmt.Println("server.applyCh:", server.applyCh)
 	server.applyCh = make(chan config.ApplyMsg)
 	go server.RegisterServer(address+"1") //50001用于外部cs间的gRPC
-	server.rf = myraft.MakeRaft(address, members, persist, &server.mu, server.applyCh)
+	server.rf = myraft.MakeRaft(address+"1", members, persist, &server.mu, server.applyCh)
 
 	server.chMap = make(map[int]chan config.Op)
 	server.cid2Seq = make(map[int64]int64)
