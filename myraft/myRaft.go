@@ -627,6 +627,9 @@ func (rf *Raft) init () {
 			electionTime := 4 * time.Second
             rf.mu.Lock()
             state := rf.state
+            if state == 2 {
+            	fmt.Println(rf.address, "is Leader")
+			}
             rf.mu.Unlock()
             fmt.Println("State ", state)
             switch state {
