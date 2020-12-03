@@ -46,7 +46,8 @@ func MakeClerk(servers []string) *Clerk {
 	ck.servers = make([]string, len(servers))
 	serversNum := len(servers)
 	for i := 0; i < serversNum; i++ {
-		ck.servers[i] = servers[i] + "1"
+		//ck.servers[i] = servers[i] + "1"
+		ck.servers[i] = servers[i]
 	}
 
 	ck.id = makeSeed()
