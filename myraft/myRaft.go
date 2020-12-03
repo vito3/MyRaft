@@ -177,6 +177,7 @@ func (rf *Raft) updateLastApplied() {
            // rf.persist.PrintStrVal("key1")
         }
         */
+        fmt.Println("applyCh <- applyMsg")
         rf.applyCh <- applyMsg
     }
 }
@@ -186,21 +187,21 @@ func (rf *Raft) updateLastApplied() {
 func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *RPC.RequestVoteReply, error ) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	fmt.Println("compare Term send receiver ", args.Term, rf.currentTerm)
+	//fmt.Println("compare Term send receiver ", args.Term, rf.currentTerm)
 	if (args.Term > rf.currentTerm) {//all server rule 1 If RPC request or response contains term T > currentTerm:
-    	fmt.Println("RequestVote receiver", rf.address, "BeFollower")
+    	//fmt.Println("RequestVote receiver", rf.address, "BeFollower")
     	rf.beFollower(args.Term) // set currentTerm = T, convert to follower (§5.1)
 	}
 	reply :=  &RPC.RequestVoteReply{}
     reply.Term = rf.currentTerm
     reply.VoteGranted = false
     if (args.Term < rf.currentTerm) || (rf.votedFor != NULL && rf.votedFor != args.CandidateId) {
-    	fmt.Println("Term send receiver ", args.Term,  rf.currentTerm)
-    	fmt.Println("RequestVote receiver", rf.address, "votedFor", rf.votedFor)
+    	//fmt.Println("Term send receiver ", args.Term,  rf.currentTerm)
+    	//fmt.Println("RequestVote receiver", rf.address, "votedFor", rf.votedFor)
         // Reply false if term < currentTerm (§5.1)  If votedFor is not null and not candidateId,
     } else if args.LastLogTerm < rf.getLastLogTerm() || (args.LastLogTerm == rf.getLastLogTerm() && args.LastLogIndex < rf.getLastLogIdx()){
-    	fmt.Println("lastLogTerm send receiver", args.LastLogTerm, rf.getLastLogTerm())
-    	fmt.Println("lastLogIndex send receiver", args.LastLogIndex, rf.getLastLogIdx())
+    	//fmt.Println("lastLogTerm send receiver", args.LastLogTerm, rf.getLastLogTerm())
+    	//fmt.Println("lastLogIndex send receiver", args.LastLogIndex, rf.getLastLogIdx())
     	//If the logs have last entries with different terms, then the log with the later term is more up-to-date.
         // If the logs end with the same term, then whichever log is longer is more up-to-date.
         // Reply false if candidate’s log is at least as up-to-date as receiver’s log
@@ -213,7 +214,7 @@ func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *R
         send(rf.voteCh) //because If election timeout elapses without receiving granting vote to candidate, so wake up
 	}
 
-	fmt.Println("-----------------------")
+	//fmt.Println("-----------------------")
 	return reply,nil
 } 
 
@@ -226,7 +227,7 @@ func (rf *Raft)  startAppendLog() {
     	if rf.address == rf.members[i] {
     		continue
 		}
-        go func(idx int) {
+        go func(idx int) { //心跳包
             for {
                 rf.mu.Lock()
                 if rf.state != Leader {
@@ -573,7 +574,7 @@ func (rf *Raft) startElection() {
                 rf.mu.Lock()
                 defer rf.mu.Unlock()
                 if reply.Term > rf.currentTerm {
-					fmt.Println( "Election: rf beFollower ")
+					//fmt.Println( "Election: rf beFollower ")
                     rf.beFollower(reply.Term)
                     return
                 }
@@ -582,10 +583,10 @@ func (rf *Raft) startElection() {
 					return
                 }
                 if reply.VoteGranted {
-					fmt.Println( "Election: rf VoteGranted true")
+					//fmt.Println( "Election: rf VoteGranted true")
                     atomic.AddInt32(&votes,1)
 				}else{
-					fmt.Println( "Election: rf VoteGranted false ", reply.Term)
+					//fmt.Println( "Election: rf VoteGranted false ", reply.Term)
 				}
                 if atomic.LoadInt32(&votes) > int32(len(rf.members) / 2) {
 					rf.beLeader()
@@ -668,7 +669,7 @@ func (rf *Raft) Start(command interface{}) (int32, int32, bool) {
         }
         rf.log = append(rf.log,newLog)
        // rf.persist()
-       fmt.Println("Start log", newLog)
+       fmt.Println("------Raft Start log", newLog)
        rf.startAppendLog()
 	}
 	//fmt.Println("new Log",  rf.log)
@@ -682,7 +683,7 @@ func (rf *Raft) sendRequestVote(address string ,args *RPC.RequestVoteArgs) (bool
 	//fmt.Println("###### StartSendRequest ######")
 	conn, err := grpc.Dial(address, grpc.WithInsecure() /*grpc.WithBlock()*/)
 	if err != nil {
-		fmt.Println("Dial ", address, " error")
+		//fmt.Println("Dial ", address, " error")
 		panic(err)
 	}
 	//fmt.Println(conn)

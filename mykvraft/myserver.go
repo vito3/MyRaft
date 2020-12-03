@@ -47,7 +47,6 @@ func (kv *KVServer) PutAppend(ctx context.Context,args *KV.PutAppendArgs) ( *KV.
 		fmt.Println("PutAppend-Handler: wrong leader")
 		return reply, nil
 	}
-
 	originOp := config.Op{args.Op, args.Key,args.Value, args.Id, args.Seq}
 	fmt.Println("PutAppend-Handler: Op-", args)
 	index, _, isLeader := kv.rf.Start(originOp)
