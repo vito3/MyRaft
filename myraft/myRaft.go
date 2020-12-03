@@ -221,7 +221,7 @@ func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *R
 
 
 //Leader Section:
-func (rf *Raft) startAppendLog() {
+func (rf *Raft)  startAppendLog() {
     for i := 0; i < len(rf.members); i++ {
     	if rf.address == rf.members[i] {
     		continue
@@ -233,17 +233,10 @@ func (rf *Raft) startAppendLog() {
                     rf.mu.Unlock()
                     return
                 } //send initial empty AppendEntries RPCs (heartbeat) to each server
-                
-                appendLog := rf.log[rf.nextIndex[idx]:]
+				fmt.Println(rf.address, "send AppendEntries to ", rf.members[idx])
+				appendLog := rf.log[rf.nextIndex[idx]:]
+                fmt.Println("Strat Append Log Info:", appendLog)
                 data, _ := json.Marshal(appendLog) //序列化
-               /*  if len(appendLog) > 0{
-                    fmt.Println(appendLog)
-                }
-                */
-                /* w := new(bytes.Buffer)
-                e := labgob.NewEncoder(w)
-                e.Encode(len(appendLog))
-                data := w.Bytes() */
 
                 args := RPC.AppendEntriesArgs{
                    Term: rf.currentTerm,
@@ -257,7 +250,6 @@ func (rf *Raft) startAppendLog() {
                 }
                 rf.mu.Unlock()
                  //:= &RPC.AppendEntriesReply{}
-                 fmt.Println("send AppendEntries to ", rf.members[idx])
                 reply, ret := rf.sendAppendEntries(rf.members[idx], &args)
 
                 rf.mu.Lock()
@@ -298,19 +290,20 @@ func (rf *Raft) startAppendLog() {
 
 func (rf *Raft) sendAppendEntries(address string , args  *RPC.AppendEntriesArgs)(*RPC.AppendEntriesReply,bool){
 	// Initialize Client
-    fmt.Println("####start SendAppendEntries####")
+    //fmt.Println("####start SendAppendEntries####")
     conn, err := grpc.Dial( address , grpc.WithInsecure(),grpc.WithBlock())
 	if err != nil {
 		fmt.Println("sendAppendEntries Dial fail: ", err)
 	}
 	defer conn.Close()
 	rf.client = RPC.NewRAFTClient(conn)
-	//ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	//defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 	//args := &RPC.AppendEntriesArgs{}
-	reply, err := rf.client.AppendEntries(context.Background(), args)
+	//reply, err := rf.client.AppendEntries(context.Background(), args)
+	reply, err := rf.client.AppendEntries(ctx, args)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("sendAppendEntries error:", err)
         return reply ,false
     }
     return reply ,true
@@ -324,7 +317,8 @@ func (rf *Raft) AppendEntries(ctx context.Context, args *RPC.AppendEntriesArgs) 
     defer rf.mu.Unlock()
     defer send(rf.appendLogCh) //If election timeout elapses without receiving AppendEntries RPC from current leader
     if args.Term > rf.currentTerm { //all server rule 1 If RPC request or response contains term T > currentTerm:
-        rf.beFollower(args.Term) // set currentTerm = T, convert to follower (§5.1)
+        fmt.Println("AppendEntries Term send receive", args.Term, rf.currentTerm)
+    	rf.beFollower(args.Term) // set currentTerm = T, convert to follower (§5.1)
     }
     reply := &RPC.AppendEntriesReply{}
 
@@ -357,18 +351,7 @@ func (rf *Raft) AppendEntries(ctx context.Context, args *RPC.AppendEntriesArgs) 
 
     var log []Log
 	json.Unmarshal(args.Log, &log) //反序列化
-
-    /* r := bytes.NewBuffer(args.Log)
-    d := labgob.NewDecoder(r)
-	var loglen int
-    d.Decode(&loglen)
-    
-    log := make([]Log,loglen)
- */
-   /*  if len(log) > 0{
-        fmt.Println(args.Term,"Append Log ",log)//.(config.Op))
-    } */
-
+	fmt.Println("Receive Log Info:", log)
     //2. Reply false if term < currentTerm (§5.1)
     if args.Term < rf.currentTerm {
         return reply, nil
@@ -467,6 +450,8 @@ func (rf *Raft) beFollower(term int32) {
     rf.votedFor = NULL
     rf.currentTerm = term
     //rf.persist()
+	fmt.Println(rf.address,"#####become Follower####",  rf.currentTerm)
+
 }
 
 
@@ -482,17 +467,18 @@ func (rf *Raft) beLeader() {
     for i := 0; i < len(rf.nextIndex); i++ {//(initialized to leader last log index + 1)
         rf.nextIndex[i] = rf.getLastLogIdx() + 1
 	}
-	//fmt.Println(rf.address,"#####become LEADER####",  rf.currentTerm)
+	fmt.Println(rf.address,"#####become LEADER####",  rf.currentTerm)
 }
 
 
 //Candidate Section:
 // If AppendEntries RPC received from new leader: convert to follower implemented in AppendEntries RPC Handler
 func (rf *Raft) beCandidate() { //Reset election timer are finished in caller
-	fmt.Println(rf.address ," become Candidate, currentTerm: ", rf.currentTerm)
+	//fmt.Println(rf.address ," become Candidate, currentTerm: ", rf.currentTerm)
 	rf.state = Candidate
     rf.currentTerm++ //Increment currentTerm
     rf.votedFor = rf.me //vote myself first
+	fmt.Println(rf.address ," become Candidate, currentTerm: ", rf.currentTerm)
     //ask for other's vote
     go rf.startElection() //Send RequestVote RPCs to all other servers
 }
@@ -601,7 +587,7 @@ func (rf *Raft) startElection() {
 				}
                 if atomic.LoadInt32(&votes) > int32(len(rf.members) / 2) {
 					rf.beLeader()
-					fmt.Println( rf.address, "beLeader, Term:", rf.currentTerm)
+					//fmt.Println( rf.address, "beLeader, Term:", rf.currentTerm)
                     send(rf.voteCh) //after be leader, then notify 'select' goroutine will sending out heartbeats immediately
                 }
             }
