@@ -228,7 +228,7 @@ func (rf *Raft)  startAppendLog() {
     		continue
 		}
         go func(idx int) { //心跳包
-            for {
+            //for {
                 rf.mu.Lock()
                 if rf.state != Leader {
                     rf.mu.Unlock()
@@ -284,7 +284,7 @@ func (rf *Raft)  startAppendLog() {
                     rf.nextIndex[idx] = tarIndex
                     rf.mu.Unlock()
 				}
-			}	
+			//}
         }(i)
     }
 }
@@ -644,7 +644,8 @@ func (rf *Raft) init () {
                     rf.mu.Unlock()
                 }
 			case Leader:
-                rf.startAppendLog()
+                //rf.startAppendLog()
+
                 time.Sleep(heartbeatTime)
             }
         }
