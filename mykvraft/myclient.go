@@ -145,7 +145,7 @@ func (ck *Clerk) putAppendValue(rid string , address string , args  *KV.PutAppen
 	//fmt.Println("###### ", rid, "Enter Client putAppendValue() ######")
 	conn, err := grpc.Dial( address , grpc.WithInsecure() )//,grpc.WithBlock())
 	if err != nil {
-		//fmt.Println("PutAppend-", rid, "Dial fail: ", err)
+		fmt.Println("PutAppend-", rid, "Dial fail: ", err)
 		return  nil, false
 	}
 	defer conn.Close()
