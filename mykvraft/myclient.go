@@ -46,8 +46,8 @@ func MakeClerk(servers []string) *Clerk {
 	ck.servers = make([]string, len(servers))
 	serversNum := len(servers)
 	for i := 0; i < serversNum; i++ {
-		//ck.servers[i] = servers[i] + "1"
-		ck.servers[i] = servers[i]
+		ck.servers[i] = servers[i] + "1"
+		//ck.servers[i] = servers[i]
 	}
 
 	ck.id = makeSeed()
@@ -144,7 +144,7 @@ func (ck *Clerk) Append(aid string, key string, value string) bool {
 
 func (ck *Clerk) putAppendValue(rid string , address string , args  *KV.PutAppendArgs) (*KV.PutAppendReply, bool){
 	//fmt.Println("###### ", rid, "Enter Client putAppendValue() ######")
-	conn, err := grpc.Dial( address , grpc.WithInsecure() )//,grpc.WithBlock())
+	conn, err := grpc.Dial(address , grpc.WithInsecure() )//,grpc.WithBlock())
 	if err != nil {
 		fmt.Println("PutAppend-", rid, "Dial fail: ", err)
 		return  nil, false

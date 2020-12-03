@@ -42,7 +42,7 @@ func (kv *KVServer) PutAppend(ctx context.Context,args *KV.PutAppendArgs) ( *KV.
 	fmt.Println("###### Enter Server PutAppend Handler ######")
 	reply := &KV.PutAppendReply{}
 	_ , reply.IsLeader = kv.rf.GetState()
-	reply.IsLeader = false
+	//reply.IsLeader = false
 	if !reply.IsLeader{
 		fmt.Println("PutAppend-Handler: wrong leader")
 		return reply, nil
