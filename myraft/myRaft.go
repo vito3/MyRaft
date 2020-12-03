@@ -234,7 +234,7 @@ func (rf *Raft)  startAppendLog() {
                     return
                 } //send initial empty AppendEntries RPCs (heartbeat) to each server
 				fmt.Println(rf.address, "send AppendEntries to ", rf.members[idx])
-				fmt.Println("idx:", idx, "rf.nextIndex[idx]:", rf.nextIndex[idx])
+				fmt.Println("len(rf.log)", len(rf.log), "idx:", idx, "rf.nextIndex[idx]:", rf.nextIndex[idx])
                 appendLog := rf.log[rf.nextIndex[idx]:]
 				//appendLog := "key value"
                 fmt.Println("Strat Append Log Info:", appendLog)
