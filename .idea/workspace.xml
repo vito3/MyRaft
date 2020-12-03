@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="2d4c3e80-ea87-4118-9179-56ba506d7a69" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mykvraft/myserver.go" beforeDir="false" afterPath="$PROJECT_DIR$/mykvraft/myserver.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/myraft/myRaft.go" beforeDir="false" afterPath="$PROJECT_DIR$/myraft/myRaft.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -56,9 +57,9 @@
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state x="250" y="371" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1440.900@0.0.1440.900" timestamp="1606380591272" />
-    <state x="620" y="199" width="670" height="676" key="search.everywhere.popup" timestamp="1606452258227">
+    <state x="620" y="199" width="670" height="676" key="search.everywhere.popup" timestamp="1606984378689">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="620" y="199" width="670" height="676" key="search.everywhere.popup/0.0.1440.900@0.0.1440.900" timestamp="1606452258227" />
+    <state x="620" y="199" width="670" height="676" key="search.everywhere.popup/0.0.1440.900@0.0.1440.900" timestamp="1606984378689" />
   </component>
 </project>

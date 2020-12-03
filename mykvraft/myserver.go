@@ -165,7 +165,7 @@ func main()  {
 	//server.applyCh = make(chan int, 1) // 原代码只保留了此句
 	//fmt.Println("server.applyCh:", server.applyCh)
 	server.applyCh = make(chan config.ApplyMsg)
-	go server.RegisterServer(address+"1") //注册服务器的端口50001， rpc监听端口5000
+	go server.RegisterServer(address+"1") //50001用于外部cs间的gRPC
 	server.rf = myraft.MakeRaft(address, members, persist, &server.mu, server.applyCh)
 
 	server.chMap = make(map[int]chan config.Op)

@@ -184,25 +184,23 @@ func (rf *Raft) updateLastApplied() {
 
  
 func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *RPC.RequestVoteReply, error ) {
-	fmt.Println("1---compare Term ", args.Term, rf.currentTerm)
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
+	fmt.Println("1---compare Term send receiver ", args.Term, rf.currentTerm)
 	if (args.Term > rf.currentTerm) {//all server rule 1 If RPC request or response contains term T > currentTerm:
-    	fmt.Println("compare Term ", args.Term, rf.currentTerm)
-    	fmt.Println("RequestVote BeFollower")
+    	fmt.Println("RequestVote receiver", rf.address, "BeFollower")
     	rf.beFollower(args.Term) // set currentTerm = T, convert to follower (§5.1)
 	}
 	reply :=  &RPC.RequestVoteReply{}
     reply.Term = rf.currentTerm
     reply.VoteGranted = false
     if (args.Term < rf.currentTerm) || (rf.votedFor != NULL && rf.votedFor != args.CandidateId) {
-    	fmt.Println("Term ", args.Term,  rf.currentTerm)
-    	fmt.Println("votedFor", rf.votedFor)
-    	fmt.Println("votedFor", rf.votedFor)
+    	fmt.Println("Term send receiver ", args.Term,  rf.currentTerm)
+    	fmt.Println("RequestVote receiver", rf.address, "votedFor", rf.votedFor)
         // Reply false if term < currentTerm (§5.1)  If votedFor is not null and not candidateId,
     } else if args.LastLogTerm < rf.getLastLogTerm() || (args.LastLogTerm == rf.getLastLogTerm() && args.LastLogIndex < rf.getLastLogIdx()){
-    	fmt.Println("lastLogTerm ", args.LastLogTerm, rf.getLastLogTerm())
-    	fmt.Println("lastLogIndex ", args.LastLogIndex, rf.getLastLogIdx())
+    	fmt.Println("lastLogTerm send receiver", args.LastLogTerm, rf.getLastLogTerm())
+    	fmt.Println("lastLogIndex send receiver", args.LastLogIndex, rf.getLastLogIdx())
     	//If the logs have last entries with different terms, then the log with the later term is more up-to-date.
         // If the logs end with the same term, then whichever log is longer is more up-to-date.
         // Reply false if candidate’s log is at least as up-to-date as receiver’s log
@@ -213,10 +211,8 @@ func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *R
         rf.state = Follower
        // rf.persist()
         send(rf.voteCh) //because If election timeout elapses without receiving granting vote to candidate, so wake up
-
 	}
-	// Debug
-	//reply.VoteGranted = true
+
 	fmt.Println("-----------------------")
 	return reply,nil
 } 
@@ -227,10 +223,7 @@ func (rf *Raft) RequestVote(ctx context.Context, args *RPC.RequestVoteArgs) ( *R
 //Leader Section:
 func (rf *Raft) startAppendLog() {
     for i := 0; i < len(rf.members); i++ {
-		fmt.Println("appendLog, cur_i", i)
-		fmt.Println(rf.address, rf.members[i])
     	if rf.address == rf.members[i] {
-			fmt.Println("equal", rf.address, rf.members[i])
     		continue
 		}
         go func(idx int) {
@@ -489,7 +482,7 @@ func (rf *Raft) beLeader() {
     for i := 0; i < len(rf.nextIndex); i++ {//(initialized to leader last log index + 1)
         rf.nextIndex[i] = rf.getLastLogIdx() + 1
 	}
-	fmt.Println(rf.address,"#####become LEADER####",  rf.currentTerm)
+	//fmt.Println(rf.address,"#####become LEADER####",  rf.currentTerm)
 }
 
 
@@ -608,7 +601,7 @@ func (rf *Raft) startElection() {
 				}
                 if atomic.LoadInt32(&votes) > int32(len(rf.members) / 2) {
 					rf.beLeader()
-					fmt.Println( rf.address, "beLeader")
+					fmt.Println( rf.address, "beLeader, Term:", rf.currentTerm)
                     send(rf.voteCh) //after be leader, then notify 'select' goroutine will sending out heartbeats immediately
                 }
             }
